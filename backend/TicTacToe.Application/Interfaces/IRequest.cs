@@ -1,6 +1,6 @@
 namespace TicTacToe.Application.Interfaces;
 
-public class IInterface
+public interface IRequest<TResult>
 {
     
 }

@@ -8,8 +8,19 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="MassTransit" Version="8.3.0" />
+        <PackageReference Include="MassTransit.Abstractions" Version="8.3.0" />
+        <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
     </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\TicTacToe.Application\TicTacToe.Application.csproj" />
+      <ProjectReference Include="..\TicTacToe.Infrastructure\TicTacToe.Infrastructure.csproj" />
+      <ProjectReference Include="..\TicTacToe.Persistence\TicTacToe.Persistence.csproj" />
+    </ItemGroup>
+
 
 </Project>
