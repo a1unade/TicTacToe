@@ -1,10 +1,8 @@
 import {useState} from "react";
-import {useNavigate} from "react-router-dom";
 import {makePasswordVisible} from "../../utils/button-handlers.ts";
 import {validatePassword, validateUsername} from "../../utils/validator.ts";
 
 const SignIn = () => {
-    const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
 
