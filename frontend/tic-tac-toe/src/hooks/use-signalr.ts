@@ -11,7 +11,7 @@ interface UseSignalRProps {
     setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
 }
 
-export const useSignalR = ({ setChatId, setChatMessages }: UseSignalRProps) => {
+export const useSignalr = ({ setChatId, setChatMessages }: UseSignalRProps) => {
     const connectionRef = useRef<HubConnection | null>(null);
 
     const joinChat = async (userId: string, chatId: string | null) => {
