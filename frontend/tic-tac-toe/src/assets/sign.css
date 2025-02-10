@@ -1,0 +1,257 @@
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-height: fit-content;
+    max-width: 420px;
+    margin-top: 100px;
+    margin-bottom: 100px;
+}
+
+#root {
+    max-width: 1280px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 0;
+}
+
+.sign-container {
+    padding: 48px 40px 36px;
+    color: rgb(32, 33, 36);
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    min-width: 380px;
+    min-height: 400px;
+    justify-content: center;
+}
+
+.sign-container h1 {
+    font-size: 24px;
+    font-weight: 400;
+}
+
+.sign-container span {
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.input-container span {
+    font-size: 14px;
+}
+
+.input-container {
+    text-align: left;
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.input-container a {
+    font-size: 14px;
+    color: mediumpurple;
+}
+
+.input-container input {
+    height: 54px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+    padding-left: 10px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.input-container input::placeholder {
+    transition: all 0.3s ease;
+    opacity: 1;
+}
+
+.input-container input:focus {
+    border: 2px solid mediumpurple;
+}
+
+.input-container input:focus::placeholder {
+    transition: all 0.3s ease;
+    opacity: 0;
+}
+
+.input-container select {
+    height: 58px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+    padding-left: 5px;
+    font-size: 16px;
+    background-color: white;
+    cursor: pointer;
+}
+
+.input-container select:focus {
+    border: 2px solid mediumpurple;
+}
+
+select:required:invalid {
+    color: rgb(118, 118, 118);
+}
+
+select:not(:required:invalid) {
+    color: rgb(32, 33, 36);
+}
+
+.sign-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 40px;
+}
+
+.left-button {
+    background-color: transparent;
+    color: mediumpurple;
+    font-size: 14px;
+    border: none;
+    max-height: 35px;
+    min-width: 120px;
+    padding: 0;
+    border-radius: 3px;
+}
+
+.left-button:hover {
+    border: none;
+    background-color: #eee;
+    color: purple;
+}
+
+.right-button {
+    background-color: mediumpurple;
+    color: #fff;
+    border-radius: 5px;
+    max-height: 38px;
+}
+
+.right-button:hover {
+    background-color: purple;
+    box-shadow: 2px 2px 4px #ccc;
+}
+
+.shake {
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    50% {
+        transform: translateX(5px);
+    }
+
+    75% {
+        transform: translateX(-5px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.error-message {
+    color: rgb(217, 48, 37);
+    display: flex;
+    flex-direction: row;
+}
+
+.error-message svg {
+    margin-right: 10px;
+}
+
+.error-message span {
+    font-size: 13px;
+}
+
+.hidden {
+    display: none;
+}
+
+.input-container {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.input-container label {
+    opacity: 0;
+    top: 50px;
+    left: 50px;
+    font-size: 0;
+}
+
+.input-container input:focus + label,
+.input-container select:focus + label {
+    opacity: 1;
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    font-size: 12px;
+    color: mediumpurple;
+    background-color: white;
+    padding-left: 5px;
+    padding-right: 5px;
+    transition: all 0.3s ease;
+}
+
+.input-container input:not(:placeholder-shown) + label,
+.input-container select:not(:required:invalid) + label {
+    opacity: 1;
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    font-size: 12px;
+    background-color: white;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.input-container input.error:not(:placeholder-shown) + label,
+.input-container input.error:focus + label {
+    color: rgb(217, 48, 37);
+    opacity: 1;
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    font-size: 12px;
+    background-color: white;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.input-container input.error {
+    border-color: rgb(217, 48, 37);
+}
+
+.input-container select.error {
+    border-color: rgb(217, 48, 37);
+}
+
+.password-button {
+    background-color: transparent;
+    font-size: 14px;
+    border: none;
+    max-height: 35px;
+    min-width: fit-content;
+    padding: 0;
+    border-radius: 3px;
+}
+
+.password-button:focus {
+    outline: none;
+}
