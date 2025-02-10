@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend/tic-tac-toe
+      dockerfile: Dockerfile
+    container_name: TicTacToe.Frontend
+    ports:
+      - "5173:80"
+    networks:
+      - tictactoe_network
+    depends_on:
+      - webapi
+
+  webapi:
+    build:
+      context: ./backend
+      dockerfile: TicTacToe.WebAPI/Dockerfile 
+    container_name: TicTacToe.WebAPI
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Postgres=Host=db;Port=5432;Username=postgres;Password=tictactoe;Database=Tic;
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - tictactoe_network
+    volumes:
+      - data_protection:/root/.aspnet/DataProtection-Keys
+    restart: always
+
+  db:
+    image: postgres:16
+    container_name: TicTacToe.PostgresSQL
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: tictactoe
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - tictactoe_network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      retries: 5
+
+volumes:
+  db_data:
+  data_protection:
+
+networks:
+  tictactoe_network:
+    driver: bridge

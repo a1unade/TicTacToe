@@ -1,10 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
+        <OutputType>Exe</OutputType>
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <InvariantGlobalization>true</InvariantGlobalization>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
@@ -20,6 +22,12 @@
       <ProjectReference Include="..\TicTacToe.Application\TicTacToe.Application.csproj" />
       <ProjectReference Include="..\TicTacToe.Infrastructure\TicTacToe.Infrastructure.csproj" />
       <ProjectReference Include="..\TicTacToe.Persistence\TicTacToe.Persistence.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="..\.dockerignore">
+        <Link>.dockerignore</Link>
+      </Content>
     </ItemGroup>
 
 
