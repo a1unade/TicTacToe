@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{C62A2E02-D47C-455A-A101-D09193651CAA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{8BDA130C-8520-494F-A72C-B795C3D2AAB5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentation", "{38EA37CB-29D5-463C-BC98-3B1E87B37AAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacToe.Application", "TicTacToe.Application\TicTacToe.Application.csproj", "{2DE1F001-DAF2-4C6A-B2D2-E270B2E1FDB7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacToe.Infrastructure", "TicTacToe.Infrastructure\TicTacToe.Infrastructure.csproj", "{AEB94B35-EF04-430F-827C-0C2BF3F256E3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacToe.Domain", "TicTacToe.Domain\TicTacToe.Domain.csproj", "{CEA22F57-AB78-4A13-AADB-D72FD37841A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacToe.Persistence", "TicTacToe.Persistence\TicTacToe.Persistence.csproj", "{C9DD1A6E-56C9-40BC-919E-3B8D05F762DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacToe.WebAPI", "TicTacToe.WebAPI\TicTacToe.WebAPI.csproj", "{1A0E95F4-6438-411A-8EBF-9A14AE4769AD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2DE1F001-DAF2-4C6A-B2D2-E270B2E1FDB7} = {C62A2E02-D47C-455A-A101-D09193651CAA}
+		{AEB94B35-EF04-430F-827C-0C2BF3F256E3} = {8BDA130C-8520-494F-A72C-B795C3D2AAB5}
+		{CEA22F57-AB78-4A13-AADB-D72FD37841A4} = {C62A2E02-D47C-455A-A101-D09193651CAA}
+		{C9DD1A6E-56C9-40BC-919E-3B8D05F762DB} = {8BDA130C-8520-494F-A72C-B795C3D2AAB5}
+		{1A0E95F4-6438-411A-8EBF-9A14AE4769AD} = {38EA37CB-29D5-463C-BC98-3B1E87B37AAD}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2DE1F001-DAF2-4C6A-B2D2-E270B2E1FDB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DE1F001-DAF2-4C6A-B2D2-E270B2E1FDB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DE1F001-DAF2-4C6A-B2D2-E270B2E1FDB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DE1F001-DAF2-4C6A-B2D2-E270B2E1FDB7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEB94B35-EF04-430F-827C-0C2BF3F256E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEB94B35-EF04-430F-827C-0C2BF3F256E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEB94B35-EF04-430F-827C-0C2BF3F256E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEB94B35-EF04-430F-827C-0C2BF3F256E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEA22F57-AB78-4A13-AADB-D72FD37841A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEA22F57-AB78-4A13-AADB-D72FD37841A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEA22F57-AB78-4A13-AADB-D72FD37841A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEA22F57-AB78-4A13-AADB-D72FD37841A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9DD1A6E-56C9-40BC-919E-3B8D05F762DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9DD1A6E-56C9-40BC-919E-3B8D05F762DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9DD1A6E-56C9-40BC-919E-3B8D05F762DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9DD1A6E-56C9-40BC-919E-3B8D05F762DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A0E95F4-6438-411A-8EBF-9A14AE4769AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A0E95F4-6438-411A-8EBF-9A14AE4769AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A0E95F4-6438-411A-8EBF-9A14AE4769AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A0E95F4-6438-411A-8EBF-9A14AE4769AD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
