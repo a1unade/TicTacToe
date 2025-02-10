@@ -14,10 +14,10 @@ const Main: React.FC = () => {
     const [showRating, setShowRating] = useState(false);
     const [showCreateGame, setShowCreateGame] = useState(false);
     const [maxRating, setMaxRating] = useState(0);
-    const [userRating, setUserRating] = useState(1100); // Заглушка для рейтинга пользователя
+    const [userRating] = useState(1100); // Заглушка для рейтинга пользователя
 
     useEffect(() => {
-        fetchGames();
+        fetchGames().then(() => console.log("список игор обновлен!"));
     }, [page]);
 
     const getStatusText = (status: string) => {
