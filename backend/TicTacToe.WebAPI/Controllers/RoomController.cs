@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using TicTacToe.Application.Features.Rooms.GetRoomById;
 using TicTacToe.Application.Features.Rooms.GetRooms;
 using TicTacToe.Application.Interfaces;
+using TicTacToe.Application.Requests;
 using TicTacToe.Application.Requests.Games;
 
 namespace TicTacToe.WebAPI.Controllers;
@@ -27,16 +28,11 @@ public class RoomController : ControllerBase
         return Ok(rooms);
     }
 
-    [HttpPost("fafawf")]
+    [HttpGet("GetRoomById")]
     public async Task<IActionResult> Gets(Guid roomId, CancellationToken cancellationToken)
     {
-        var t = await _context.Rooms
-            .Include(x => x.Player1)
-            .Include(x => x.Player2)
-            .Include(r => r.Match) // Подгружаем связанный матч
-            .FirstOrDefaultAsync(r => r.Id == roomId, cancellationToken);
+        var response = await _mediator.Send(new GetRoomByIdQuery(new IdRequest { Id = roomId }), cancellationToken);
 
-        return Ok(t);
-
+        return Ok(response);
     }
 }
