@@ -14,11 +14,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IJwtService, JwtService>()
             .AddScoped<IPasswordHasher, PasswordHasher>()
             .AddScoped<IRoomService, RoomService>()
-            .AddScoped<IMatchService, MatchService>();
+            .AddScoped<IMatchService, MatchService>()
+            .AddSingleton<IUserScoreService, UserScoreService>();
 
         services.AddSignalR();
         
         services.AddMessageBus(configuration);
+        
+        services.AddMongo(configuration);
     }
     
     private static void AddMessageBus(this IServiceCollection services, IConfiguration configuration)
@@ -40,5 +43,10 @@ public static class ServiceCollectionExtensions
                 cfg.ConfigureEndpoints(context);
             });
         });
+    }
+    
+    private static void AddMongo(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<MongoOptions>(configuration.GetSection("MongoOptions"));
     }
 }

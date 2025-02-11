@@ -9,12 +9,14 @@ public class LoginHandler : IHandler<LoginCommand, AuthResponse>
     private readonly IDbContext _context;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtService _jwtService;
+    private readonly IUserScoreService _scoreService;
 
-    public LoginHandler(IDbContext context, IPasswordHasher passwordHasher, IJwtService jwtService)
+    public LoginHandler(IDbContext context, IPasswordHasher passwordHasher, IJwtService jwtService, IUserScoreService scoreService)
     {
         _context = context;
         _passwordHasher = passwordHasher;
         _jwtService = jwtService;
+        _scoreService = scoreService;
     }
 
     public async Task<AuthResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -43,7 +45,9 @@ public class LoginHandler : IHandler<LoginCommand, AuthResponse>
                 };
             }
 
-            var token = _jwtService.GenerateToken(user);
+            var userScore = await _scoreService.GetByUserIdPostgresAsync(user.Id, cancellationToken);
+
+            var token = _jwtService.GenerateToken(user, userScore?.Score ?? 0);
 
             return new AuthResponse
             {

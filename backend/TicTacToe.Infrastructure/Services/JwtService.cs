@@ -17,13 +17,13 @@ public class JwtService : IJwtService
     {
         _options = configuration.GetSection("JwtSettings").Get<AuthOptions>()!;
     }
-    public string GenerateToken(User user)
+    public string GenerateToken(User user, int score)
     {
         Claim[] claims = 
         {
             new ("Id", user.Id.ToString()),
             new ("Name", user.Name),
-            new ("Score", user.Score.ToString())
+            new ("Score", score.ToString())
         };
 
         var issuer = _options.Issuer;

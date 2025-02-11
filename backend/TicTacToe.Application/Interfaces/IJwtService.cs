@@ -4,5 +4,5 @@ namespace TicTacToe.Application.Interfaces;
 
 public interface IJwtService
 {
-    public string GenerateToken(User user);
+    public string GenerateToken(User user, int score);
 }

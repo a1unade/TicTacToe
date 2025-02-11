@@ -19,6 +19,7 @@ public class MatchService : IMatchService
         var match = await _context.Matches
             .Include(x => x.CurrentPlayerId)
             .FirstOrDefaultAsync(m => m.RoomId == moveDto.RoomId);
+        
         if (match == null) return ("", "Error", null, "Матч не найден");
 
         var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == moveDto.RoomId);
@@ -43,8 +44,8 @@ public class MatchService : IMatchService
         {
             match.Status = "GameOver";
             await _context.SaveChangesAsync();
-            await UpdateScoresAndNotify(match.RoomId, winner);
-            return (match.Board, "GameOver", null, $"Победитель: {winner}");
+            //await UpdateScoresAndNotify(match.RoomId, winner);
+            return (match.Board, match.Status, null, $"Победитель: {winner}");
         }
 
         // Проверяем на ничью
@@ -52,8 +53,8 @@ public class MatchService : IMatchService
         {
             match.Status = "Draw";
             await _context.SaveChangesAsync();
-            await NotifyDraw(match.RoomId);
-            return (match.Board, "Draw", null, "Ничья!");
+           // await NotifyDraw(match.RoomId);
+            return (match.Board, match.Status, null, "Ничья!");
         }
 
         // Смена игрока
@@ -69,34 +70,32 @@ public class MatchService : IMatchService
     {
         
         
-        
-        
-        /// ТУт можно добавить монго или ребит 
-        var room = await _context.Rooms
-            .Include(r => r.Player1)
-            .Include(r => r.Player2)
-            .FirstOrDefaultAsync(r => r.Id == roomId);
-
-        if (room == null) return;
-
-        var winnerPlayer = winner == "X" ? room.Player1 : room.Player2;
-        var loserPlayer = winner == "X" ? room.Player2 : room.Player1;
-
-        if (winnerPlayer != null)
-        {
-            winnerPlayer.Score += 3; 
-        }
-
-        if (loserPlayer != null)
-        {
-            loserPlayer.Score -= 1; 
-            if (loserPlayer.Score < 0)
-            {
-                loserPlayer.Score = 0; 
-            }
-        }
-
-        await _context.SaveChangesAsync();
+        // /// ТУт можно добавить монго или ребит 
+        // var room = await _context.Rooms
+        //     .Include(r => r.Player1)
+        //     .Include(r => r.Player2)
+        //     .FirstOrDefaultAsync(r => r.Id == roomId);
+        //
+        // if (room == null) return;
+        //
+        // var winnerPlayer = winner == "X" ? room.Player1 : room.Player2;
+        // var loserPlayer = winner == "X" ? room.Player2 : room.Player1;
+        //
+        // if (winnerPlayer != null)
+        // {
+        //     winnerPlayer.Score += 3; 
+        // }
+        //
+        // if (loserPlayer != null)
+        // {
+        //     loserPlayer.Score -= 1; 
+        //     if (loserPlayer.Score < 0)
+        //     {
+        //         loserPlayer.Score = 0; 
+        //     }
+        // }
+        //
+        // await _context.SaveChangesAsync();
     }
 
     private async Task NotifyDraw(Guid roomId)
@@ -152,10 +151,10 @@ public class MatchService : IMatchService
         var newMatch = new Match
         {
             RoomId = room.Id,
-            Board = "---------", // Начальная пустая доска
-            Status = "InProgress", // Статус игры в процессе
-            CurrentPlayerId = room.Player1Id, // Игрок 1 начинает первым
-            MaxScore = room.Match.MaxScore // Очки для нового матча
+            Board = "---------", 
+            Status = "InProgress",
+            CurrentPlayerId = room.Player1Id, 
+            MaxScore = room.Match.MaxScore 
         };
 
         // Сохраняем новый матч

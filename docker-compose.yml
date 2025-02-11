@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   frontend:
@@ -21,8 +21,18 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__Postgres=Host=db;Port=5432;Username=postgres;Password=tictactoe;Database=Tic;
+      - MongoOptions__ConnectionString=mongodb://mongo:27017
+      - MongoOptions__DatabaseName=TicTacToeDB
+      - MongoOptions__CollectionName=UserScores
+      - RabbitOptions__Username=guest
+      - RabbitOptions__Password=guest
+      - RabbitOptions__Hostname=rabbit
     depends_on:
       db:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      rabbit:
         condition: service_healthy
     ports:
       - "8080:8080"
@@ -49,9 +59,42 @@ services:
       interval: 5s
       retries: 5
 
+  mongo:
+    image: mongo:7
+    container_name: TicTacToe.MongoDB
+    ports:
+      - "27017:27017"
+    networks:
+      - tictactoe_network
+    volumes:
+      - mongo_data:/data/db
+    restart: always
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017 --quiet
+      interval: 10s
+      retries: 5
+
+  rabbit:
+    image: rabbitmq:3-management
+    container_name: TicTacToe.RabbitMQ
+    ports:
+      - "5672:5672"   
+      - "15672:15672" 
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - tictactoe_network
+    restart: always
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      retries: 5
+
 volumes:
   db_data:
   data_protection:
+  mongo_data:
 
 networks:
   tictactoe_network:

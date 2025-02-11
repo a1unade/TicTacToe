@@ -25,19 +25,16 @@ public class DbSeeder : IDbSeeder
             {
                 Name = "Bool",
                 PasswordHash = _passwordHasher.HashPassword("Bool"),
-                Score = 100
             },
             new ()
             {
                 Name = "M9s0",
                 PasswordHash = _passwordHasher.HashPassword("M9s0"),
-                Score = 200
             },
             new ()
             {
                 Name = "Mesi",
                 PasswordHash = _passwordHasher.HashPassword("Mesi"),
-                Score = 300
             }
         };
 
