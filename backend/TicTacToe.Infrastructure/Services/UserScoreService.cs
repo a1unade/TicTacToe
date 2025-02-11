@@ -29,18 +29,13 @@ public class UserScoreService : IUserScoreService
 
     public async Task UpdateUserScoreAsync(UserScore userScore)
     {
-        // Создаем фильтр для поиска пользователя по его UserIdPostgres
         var filter = Builders<UserScore>.Filter.Eq(u => u.UserIdPostgres, userScore.UserIdPostgres);
-
-        // Создаем обновление для изменения только поля Score
         var update = Builders<UserScore>.Update.Set(u => u.Score, userScore.Score);
 
-        // Выполняем обновление, если пользователь существует
         var result = await _mongo.UpdateOneAsync(filter, update);
 
         if (result.MatchedCount == 0)
         {
-            // Если пользователь не найден, выбрасываем исключение или логируем ошибку
             throw new Exception($"User with ID {userScore.UserIdPostgres} not found.");
         }
     }
