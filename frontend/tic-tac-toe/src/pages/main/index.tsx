@@ -7,6 +7,7 @@ import {useSignalR} from "../../hooks/use-signalr.ts";
 import {useUserTypedSelector} from "../../hooks/use-typed-selector.ts";
 import {useNavigate} from "react-router-dom";
 import {useUserActions} from "../../hooks/use-actions.ts";
+import {useAlerts} from "../../hooks/use-alerts.ts";
 
 const Main: React.FC = () => {
     const [rooms, setRooms] = useState<RoomResponse[]>([]);
@@ -20,7 +21,7 @@ const Main: React.FC = () => {
     const componentRef = useRef<HTMLDivElement | null>(null);
     const {id, score, username} = useUserTypedSelector(state => state.user);
     const {deleteUser} = useUserActions();
-
+    const {addAlert} = useAlerts();
     const { createOrJoinRoom, joinRoom } = useSignalR();
 
     const handleScroll = useCallback((event: Event) => {
@@ -35,6 +36,22 @@ const Main: React.FC = () => {
             setPage(page + 1);
         }
     }, [page, pageCount]);
+
+    const handleCreateRoom = async () => {
+        const existingRoom = rooms.find(
+            (room) => room.creatorId === id && room.status !== "Finished"
+        );
+
+        if (existingRoom) {
+            addAlert("Вы уже создали игру. Дождитесь завершения текущей игры.");
+        } else {
+            await createOrJoinRoom(id, null, maxRating);
+
+        }
+
+        setShowCreateGame(false);
+    };
+
 
     useEffect(() => {
         const currentRef = componentRef.current;
@@ -129,10 +146,11 @@ const Main: React.FC = () => {
             <RatingModal showRating={showRating} setShowRating={setShowRating} />
 
             {showCreateGame && (
-                <div className="modal">
+                <div className="modal" style={{ display: "flex", flexDirection: "column" }}>
                     <h2>Создать игру</h2>
+                    <span>Максимальный рейтинг соперника</span>
                     <input type="number" value={maxRating} onChange={e => setMaxRating(parseInt(e.target.value))} placeholder="Макс. рейтинг" />
-                    <button onClick={() => createOrJoinRoom(id, null, maxRating)}>Создать</button>
+                    <button onClick={handleCreateRoom}>Создать</button>
                 </div>
             )}
         </div>
