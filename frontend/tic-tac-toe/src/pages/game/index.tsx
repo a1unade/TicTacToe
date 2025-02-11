@@ -10,7 +10,6 @@ const Game = () => {
     const {id, score} = useUserTypedSelector(state => state.user);
     const {roomId} = useParams<string>();
     const [game, setGame] = useState<GameResponse>();
-    const [isXNext, setIsXNext] = useState(true);
     const [winningLine, setWinningLine] = useState<number[] | null>(null);
     const {addAlert} = useAlerts();
     const {joinGame, sendMove, board, initializeBoard, gameMessage, gameStatus} = useSignalR()
@@ -33,20 +32,26 @@ const Game = () => {
                 setWinningLine(winnerData.line);
             }
         }
-    }, [gameStatus, gameMessage]);
+    }, [gameStatus, gameMessage, board]);
 
     const handleClick = async (index: number) => {
+        if (!game) return;
+
+        const { firstPlayer, secondPlayer } = game;
+
+        if (id !== firstPlayer.userId && id !== secondPlayer?.userId) {
+            addAlert("Вы зритель, вы не можете ходить!");
+            return;
+        }
+
+        if (game.match.currentPlayerId !== id) {
+            addAlert("Сейчас не ваш ход!");
+            return;
+        }
+
         if (board[index] || winningLine) return;
-        const newBoard = board.slice();
-        newBoard[index] = id === game!.firstPlayer.userId ? game!.firstPlayer.symbol : game!.secondPlayer.symbol;
-        setIsXNext(!isXNext);
 
         await sendMove(id, roomId!, index);
-
-        const winnerData = calculateWinner(newBoard);
-        if (winnerData) {
-            setWinningLine(winnerData.line);
-        }
     };
 
     const handleJoinGame = async () => {
