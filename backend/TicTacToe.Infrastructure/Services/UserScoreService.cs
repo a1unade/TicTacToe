@@ -27,17 +27,22 @@ public class UserScoreService : IUserScoreService
         await _mongo.InsertOneAsync(newUserScore, cancellationToken: cancellationToken);
     }
 
-    public async Task UpdateScoreAsync(Guid userIdPostgres, int newScore, CancellationToken cancellationToken)
+    public async Task UpdateUserScoreAsync(UserScore userScore)
     {
-        var filter = Builders<UserScore>.Filter.Eq(u => u.UserIdPostgres, userIdPostgres);
-        var update = Builders<UserScore>.Update.Set(u => u.Score, newScore);
+        // Создаем фильтр для поиска пользователя по его UserIdPostgres
+        var filter = Builders<UserScore>.Filter.Eq(u => u.UserIdPostgres, userScore.UserIdPostgres);
 
-        var options = new FindOneAndUpdateOptions<UserScore>
+        // Создаем обновление для изменения только поля Score
+        var update = Builders<UserScore>.Update.Set(u => u.Score, userScore.Score);
+
+        // Выполняем обновление, если пользователь существует
+        var result = await _mongo.UpdateOneAsync(filter, update);
+
+        if (result.MatchedCount == 0)
         {
-            IsUpsert = true 
-        };
-
-        await _mongo.FindOneAndUpdateAsync(filter, update, options, cancellationToken);
+            // Если пользователь не найден, выбрасываем исключение или логируем ошибку
+            throw new Exception($"User with ID {userScore.UserIdPostgres} not found.");
+        }
     }
     
     public async Task<UserScore?> GetByUserIdPostgresAsync(Guid userIdPostgres, CancellationToken cancellationToken)
