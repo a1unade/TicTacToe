@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useRef } from "react";
+import React, {createContext, useEffect, useRef, useState} from "react";
 import { HubConnectionBuilder, HubConnection, HubConnectionState } from "@microsoft/signalr";
 
 // Типы для соединения
@@ -19,12 +19,16 @@ export interface SignalRContextProps {
     joinRoom: (userId: string, roomId: string) => Promise<void>;
     joinGame: (userId: string, roomId: string) => Promise<void>;
     sendMove: (userId: string, roomId: string, position: number) => Promise<void>;
+    board: Array<string | null>;
+    setBoard: React.Dispatch<React.SetStateAction<Array<string | null>>>;
+    initializeBoard: (boardString: string) => void;
 }
 
 export const SignalRContext = createContext<SignalRContextProps | undefined>(undefined);
 
 export const SignalRProvider:React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const connectionRef = useRef<HubConnection | null>(null);
+    const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
 
     const startConnection = async () => {
         if (connectionRef.current && connectionRef.current.state === HubConnectionState.Connected) {
@@ -43,7 +47,8 @@ export const SignalRProvider:React.FC<{ children: React.ReactNode }> = ({ childr
         });
 
         newConnection.on("ReceiveMove", (data) => {
-            console.log("Move:", data);
+            console.log("Received Move:", data);
+            updateBoard(data.board);
         });
 
         try {
@@ -119,6 +124,16 @@ export const SignalRProvider:React.FC<{ children: React.ReactNode }> = ({ childr
         }
     }
 
+    const updateBoard = (boardString: string) => {
+        const newBoard = boardString.split('').map(char => char === '-' ? null : char);
+        setBoard(newBoard);
+    };
+
+    // Функция для инициализации доски с данными от сервера
+    const initializeBoard = (boardString: string) => {
+        updateBoard(boardString);
+    };
+
     useEffect(() => {
         startConnection();
 
@@ -128,7 +143,7 @@ export const SignalRProvider:React.FC<{ children: React.ReactNode }> = ({ childr
     }, []);
 
     return (
-        <SignalRContext.Provider value={{ connectionRef, createOrJoinRoom, joinRoom, joinGame, sendMove }}>
+        <SignalRContext.Provider value={{ connectionRef, createOrJoinRoom, joinRoom, joinGame, sendMove, board, setBoard, initializeBoard }}>
             {children}
         </SignalRContext.Provider>
     );

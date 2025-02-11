@@ -9,28 +9,27 @@ const Game = () => {
     const {id} = useUserTypedSelector(state => state.user);
     const {roomId} = useParams<string>();
     const [game, setGame] = useState<GameResponse>();
-    const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
     const [isXNext, setIsXNext] = useState(true);
     const [winningLine, setWinningLine] = useState<number[] | null>(null);
-    const {joinGame, sendMove} = useSignalR()
+    const {joinGame, sendMove, board, initializeBoard} = useSignalR()
 
     useEffect(() => {
         apiClient.get<GameResponse>(`Room/GetRoomById?roomId=${roomId}`)
             .then((response) => {
                if (response.status === 200) {
                    setGame(response.data);
+                   initializeBoard(game!.match.board);
                }
             });
-    })
+    }, [initializeBoard, game, setGame]);
 
-    const handleClick = (index: number) => {
+    const handleClick = async (index: number) => {
         if (board[index] || winningLine) return;
         const newBoard = board.slice();
-        newBoard[index] = isXNext ? 'X' : 'O';
-        setBoard(newBoard);
+        newBoard[index] = id === game!.firstPlayer.userId ? game!.firstPlayer.symbol : game!.secondPlayer.symbol;
         setIsXNext(!isXNext);
 
-        sendMove(id, roomId!, index);
+        await sendMove(id, roomId!, index);
 
         const winnerData = calculateWinner(newBoard);
         if (winnerData) {
