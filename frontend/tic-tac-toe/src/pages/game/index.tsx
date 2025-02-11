@@ -18,7 +18,7 @@ const Game = () => {
             .then((response) => {
                if (response.status === 200) {
                    setGame(response.data);
-                   initializeBoard(game!.match.board);
+                   initializeBoard(response.data.match.board);
                }
             });
     }, [initializeBoard, game, setGame]);

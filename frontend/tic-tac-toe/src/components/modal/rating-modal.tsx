@@ -20,7 +20,7 @@ const RatingModal = (props: {
         apiClient.get<RatingListResponse>("User/topUsers")
             .then((response) => {
                 if (response.status === 200 && isMounted) {
-                    setUsers(response.data.usersDtos);
+                    setUsers(response.data.usersDtosScores);
                 }
             })
             .catch((error) => console.error("Ошибка загрузки рейтинга:", error));
