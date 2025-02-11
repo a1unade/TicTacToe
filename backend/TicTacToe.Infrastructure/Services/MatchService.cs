@@ -4,7 +4,6 @@ using TicTacToe.Application.Interfaces;
 
 namespace TicTacToe.Infrastructure.Services;
 
-
 public class MatchService : IMatchService
 {
     private readonly IDbContext _context;
@@ -16,17 +15,13 @@ public class MatchService : IMatchService
 
     public async Task<(string Board, string Status, Guid? NextPlayer, string Message)> ProcessMove(MoveDto moveDto)
     {
-        var match = await _context.Matches.FirstOrDefaultAsync(m => m.RoomId == moveDto.RoomId);
+        var match = await _context.Matches
+            .Include(x => x.CurrentPlayerId)
+            .FirstOrDefaultAsync(m => m.RoomId == moveDto.RoomId);
         if (match == null) return ("", "Error", null, "Матч не найден");
 
         var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == moveDto.RoomId);
         if (room == null) return ("", "Error", null, "Комната не найдена");
-
-        // Определяем, кто ходит первым
-        if (match.CurrentPlayerId == Guid.Empty)
-        {
-            match.CurrentPlayerId = room.Player1Id;
-        }
 
         // Проверяем, чей сейчас ход
         if (match.CurrentPlayerId != moveDto.PlayerId)
@@ -38,16 +33,16 @@ public class MatchService : IMatchService
 
         // Обновляем доску
         var boardArray = match.Board.ToCharArray();
-        boardArray[moveDto.Position] = (moveDto.PlayerId == room.Player1Id) ? 'X' : 'O';
+        boardArray[moveDto.Position] = moveDto.PlayerId == room.Player1Id ? 'X' : 'O';
         match.Board = new string(boardArray);
 
         // Проверяем, есть ли победитель
-        string? winner = CheckWinner(match.Board);
+        string winner = CheckWinner(match.Board);
         if (winner != null)
         {
             match.Status = "GameOver";
-            match.WinnerId = moveDto.PlayerId;
             await _context.SaveChangesAsync();
+            await UpdateScoresAndNotify(match.RoomId, winner);
             return (match.Board, "GameOver", null, $"Победитель: {winner}");
         }
 
@@ -56,28 +51,74 @@ public class MatchService : IMatchService
         {
             match.Status = "Draw";
             await _context.SaveChangesAsync();
+            await NotifyDraw(match.RoomId);
             return (match.Board, "Draw", null, "Ничья!");
         }
 
         // Смена игрока
-        match.CurrentPlayerId = (match.CurrentPlayerId == room.Player1Id) ? room.Player2Id ?? room.Player1Id : room.Player1Id;
+        match.CurrentPlayerId =
+            (match.CurrentPlayerId == room.Player1Id) ? room.Player2Id ?? room.Player1Id : room.Player1Id;
 
         await _context.SaveChangesAsync();
 
         return (match.Board, "InProgress", match.CurrentPlayerId, "Ход принят!");
     }
 
+    private async Task UpdateScoresAndNotify(Guid roomId, string winner)
+    {
+        var room = await _context.Rooms
+            .Include(r => r.Player1)
+            .Include(r => r.Player2)
+            .FirstOrDefaultAsync(r => r.Id == roomId);
+
+        if (room == null) return;
+
+        var winnerPlayer = winner == "X" ? room.Player1 : room.Player2;
+        var loserPlayer = winner == "X" ? room.Player2 : room.Player1;
+
+        if (winnerPlayer != null)
+        {
+            winnerPlayer.Score += 3; 
+        }
+
+        if (loserPlayer != null)
+        {
+            loserPlayer.Score -= 1; 
+            if (loserPlayer.Score < 0)
+            {
+                loserPlayer.Score = 0; 
+            }
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    private async Task NotifyDraw(Guid roomId)
+    {
+        var room = await _context.Rooms
+            .Include(r => r.Player1)
+            .Include(r => r.Player2)
+            .FirstOrDefaultAsync(r => r.Id == roomId);
+
+        if (room == null) return;
+
+        // Отправляем уведомление о ничьей
+        // Вызываем метод в хабе через интерфейс для отправки уведомлений клиенту
+    }
+
     private static string? CheckWinner(string board)
     {
-        int[][] winPatterns = {
+        int[][] winPatterns =
+        {
             new[] { 0, 1, 2 }, new[] { 3, 4, 5 }, new[] { 6, 7, 8 }, // Горизонтали
             new[] { 0, 3, 6 }, new[] { 1, 4, 7 }, new[] { 2, 5, 8 }, // Вертикали
-            new[] { 0, 4, 8 }, new[] { 2, 4, 6 }                    // Диагонали
+            new[] { 0, 4, 8 }, new[] { 2, 4, 6 } // Диагонали
         };
 
         foreach (var pattern in winPatterns)
         {
-            if (board[pattern[0]] != '-' && board[pattern[0]] == board[pattern[1]] && board[pattern[1]] == board[pattern[2]])
+            if (board[pattern[0]] != '-' && board[pattern[0]] == board[pattern[1]] &&
+                board[pattern[1]] == board[pattern[2]])
             {
                 return board[pattern[0]].ToString();
             }
