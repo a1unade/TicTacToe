@@ -36,7 +36,7 @@ const SignIn = () => {
 
         if (messagePassword.length === 0 && messageUsername.length === 0) {
             try {
-                createUser(username, password, "login");
+                await createUser(username, password, "login");
                 navigate('/');
             } catch (error: unknown) {
                 if (error instanceof Error) {
