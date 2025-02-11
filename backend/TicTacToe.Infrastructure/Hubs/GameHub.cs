@@ -160,6 +160,17 @@ public class GameHub : Hub
                 Status = "GameOver",
                 Message = $"Победитель: {nextPlayer}"
             });
+            
+            var (newBoard, newStatus, playerId, symbol) = await _matchService.StartNewRound(move.RoomId);
+            
+            await Clients.Group(move.RoomId.ToString()).SendAsync("NewRound", new
+            {
+                Message = "Начинаем новый раунд!",
+                Board = newBoard,
+                Status = newStatus,
+                CurrentPlayer = playerId,
+                Symbol = symbol
+            });
         }
 
         if (status == "Draw")
@@ -170,6 +181,17 @@ public class GameHub : Hub
                 Board = board,
                 Status = "Draw",
                 Message = "Ничья!"
+            });
+            
+            var (newBoard, newStatus, playerId, symbol) = await _matchService.StartNewRound(move.RoomId);
+            
+            await Clients.Group(move.RoomId.ToString()).SendAsync("NewRound", new
+            {
+                Message = "Начинаем новый раунд!",
+                Board = newBoard,
+                Status = newStatus,
+                CurrentPlayer = playerId,
+                Symbol = symbol
             });
         }
     }
