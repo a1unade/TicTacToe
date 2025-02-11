@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TicTacToe.Application.DTOs;
 using TicTacToe.Application.Interfaces;
 
 namespace TicTacToe.Infrastructure.Services;
@@ -13,32 +14,39 @@ public class MatchService : IMatchService
         _context = context;
     }
 
-    public async Task<(string Board, string Status, Guid? NextPlayer, string Message)> ProcessMove(Guid roomId, Guid playerId, int position)
+    public async Task<(string Board, string Status, Guid? NextPlayer, string Message)> ProcessMove(MoveDto moveDto)
     {
-        var match = await _context.Matches.FirstOrDefaultAsync(m => m.RoomId == roomId);
+        var match = await _context.Matches.FirstOrDefaultAsync(m => m.RoomId == moveDto.RoomId);
         if (match == null) return ("", "Error", null, "Матч не найден");
 
-        var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == roomId);
+        var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == moveDto.RoomId);
         if (room == null) return ("", "Error", null, "Комната не найдена");
 
+        // Определяем, кто ходит первым
+        if (match.CurrentPlayerId == Guid.Empty)
+        {
+            match.CurrentPlayerId = room.Player1Id;
+        }
+
         // Проверяем, чей сейчас ход
-        if (match.CurrentPlayerId != playerId)
+        if (match.CurrentPlayerId != moveDto.PlayerId)
             return (match.Board, match.Status, match.CurrentPlayerId, "Сейчас не ваш ход!");
 
         // Проверяем, свободна ли ячейка
-        if (match.Board[position] != '-')
+        if (match.Board[moveDto.Position] != '-')
             return (match.Board, match.Status, match.CurrentPlayerId, "Эта клетка уже занята!");
 
         // Обновляем доску
         var boardArray = match.Board.ToCharArray();
-        boardArray[position] = playerId == room.Player1Id ? 'X' : 'O';
+        boardArray[moveDto.Position] = (moveDto.PlayerId == room.Player1Id) ? 'X' : 'O';
         match.Board = new string(boardArray);
 
         // Проверяем, есть ли победитель
-        string winner = CheckWinner(match.Board);
+        string? winner = CheckWinner(match.Board);
         if (winner != null)
         {
             match.Status = "GameOver";
+            match.WinnerId = moveDto.PlayerId;
             await _context.SaveChangesAsync();
             return (match.Board, "GameOver", null, $"Победитель: {winner}");
         }

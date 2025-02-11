@@ -18,7 +18,7 @@ public class GetGamesQueryHandler : IHandler<GetGamesQuery, GamesList>
         var query = _context.Rooms
             .Include(r => r.Player1)
             .Include(r => r.Match)
-            .OrderByDescending(r => r.Status == "Waiting" || r.Status == "InProgress" ? 1 : 0) 
+            .OrderByDescending(r => r.Status == "Waiting" || r.Status == "InGame" ? 1 : 0) 
             .ThenByDescending(r => r.CreatedAt); 
 
         var totalCount = await query.CountAsync(cancellationToken);
