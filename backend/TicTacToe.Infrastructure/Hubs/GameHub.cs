@@ -118,7 +118,7 @@ public class GameHub : Hub
             return message;
         }
 
-        return $"Место занято этими челами: {room.Player1.Name} и  {room.Player2.Name}";
+        return $"Место занято этими челами: {room.Player1.Name} и {room.Player2.Name}";
     }
 
     public async Task NotifyMove(Guid roomId, int position)
@@ -137,12 +137,12 @@ public class GameHub : Hub
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
     }
-
+    
     public async Task SendMove(MoveDto move)
     {
         var (board, status, nextPlayer, message) = await _matchService.ProcessMove(move);
 
-        // Отправляем ход всем в комнате
+        // Отправляем обновление всем в комнате
         await Clients.Group(move.RoomId.ToString()).SendAsync("ReceiveMove", new
         {
             Board = board,
@@ -151,14 +151,25 @@ public class GameHub : Hub
             Message = message
         });
 
-        // Если игра закончена, уведомляем игроков
-        if (status == "GameOver" || status == "Draw")
+        if (status == "GameOver")
         {
+            // Отправляем уведомление о победителе
             await Clients.Group(move.RoomId.ToString()).SendAsync("GameEnded", new
             {
                 Board = board,
-                Status = status,
-                Message = message
+                Status = "GameOver",
+                Message = $"Победитель: {nextPlayer}"
+            });
+        }
+
+        if (status == "Draw")
+        {
+            // Отправляем уведомление о ничьей
+            await Clients.Group(move.RoomId.ToString()).SendAsync("GameEnded", new
+            {
+                Board = board,
+                Status = "Draw",
+                Message = "Ничья!"
             });
         }
     }
