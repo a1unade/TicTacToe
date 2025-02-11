@@ -66,32 +66,45 @@ public class GameHub : Hub
 
     public async Task<string> JoinRoom(JoinDto joinDto)
     {
-        var room = await _roomService.GetRoomByIdAsync(joinDto.RoomId);
-    
-        if (room == null)
+        try
         {
-            await Clients.Caller.SendAsync("Info", new
+            var room = await _roomService.GetRoomByIdAsync(joinDto.RoomId);
+    
+            if (room == null)
             {
-                Message = "Room not found",
-                RoomId = joinDto.RoomId
+                await Clients.Caller.SendAsync("Info", new
+                {
+                    Message = "Room not found",
+                    RoomId = joinDto.RoomId
+                });
+
+                return "Room not found";
+            }
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, joinDto.RoomId.ToString());
+
+            await Clients.Group(room.Id.ToString()).SendAsync("Info", new
+            {
+                Room = room,
+                Creator = room.Player1,
+                Role = "Player1",
+                RoomId = joinDto.RoomId,
+                Match = room.Match,
+                Message = "Player joined the room"
             });
 
-            return "Room not found";
+            return $"Connected to room {joinDto.RoomId}";
         }
-
-        await Groups.AddToGroupAsync(Context.ConnectionId, joinDto.RoomId.ToString());
-
-        await Clients.Group(room.Id.ToString()).SendAsync("Info", new
+        catch (Exception e)
         {
-            Room = room,
-            Creator = room.Player1,
-            Role = "Player1",
-            RoomId = joinDto.RoomId,
-            Match = room.Match,
-            Message = "Player joined the room"
-        });
-
-        return $"Connected to room {joinDto.RoomId}";
+            await Clients.Group(joinDto.RoomId.ToString()).SendAsync("Info", new
+            {
+                RoomId = joinDto.RoomId,
+                Message = "Player joined the room"
+            });
+            Console.WriteLine(e);
+            return "Pizda";
+        }
     }
     public async Task NotifyMove(Guid roomId, int position)
     {
