@@ -7,10 +7,12 @@ namespace TicTacToe.Infrastructure.Hubs;
 public class GameHub : Hub
 {
     private readonly IRoomService _roomService;
+    private readonly IMatchService _matchService;
 
-    public GameHub(IRoomService roomService)
+    public GameHub(IRoomService roomService, IMatchService matchService)
     {
         _roomService = roomService;
+        _matchService = matchService;
     }
 
     public async Task<string> CreateOrJoinRoom(ConnectionDto connectionDto)
@@ -136,9 +138,28 @@ public class GameHub : Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
     }
 
-    public async Task SendMove(Guid roomId, int position, Guid playerId)
+    public async Task SendMove(MoveDto move)
     {
-        // Логика обработки хода
-        await Clients.Group(roomId.ToString()).SendAsync("ReceiveMove", position, playerId);
+        var (board, status, nextPlayer, message) = await _matchService.ProcessMove(move);
+
+        // Отправляем ход всем в комнате
+        await Clients.Group(move.RoomId.ToString()).SendAsync("ReceiveMove", new
+        {
+            Board = board,
+            Status = status,
+            NextPlayer = nextPlayer,
+            Message = message
+        });
+
+        // Если игра закончена, уведомляем игроков
+        if (status == "GameOver" || status == "Draw")
+        {
+            await Clients.Group(move.RoomId.ToString()).SendAsync("GameEnded", new
+            {
+                Board = board,
+                Status = status,
+                Message = message
+            });
+        }
     }
 }
