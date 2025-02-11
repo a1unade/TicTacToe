@@ -2,11 +2,18 @@ import {makePasswordVisible} from "../../utils/button-handlers.ts";
 import {useState} from "react";
 import {validatePassword, validateUsername} from "../../utils/validator.ts";
 import errors from '../../utils/error-messages.ts';
+import {useUserActions} from "../../hooks/use-actions.ts";
+import {useAlerts} from "../../hooks/use-alerts.ts";
+import axios from "axios";
+import {Link, useNavigate} from "react-router-dom";
 
 const SignUp = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirm, setConfirm] = useState('');
+    const navigate = useNavigate();
+    const {createUser} = useUserActions();
+    const {addAlert} = useAlerts();
 
     const handleNextButtonClick = async () => {
         const messagePassword = validatePassword(password);
@@ -39,9 +46,24 @@ const SignUp = () => {
             }, 500);
         }
 
-        // if (message.length === 0 && password === confirm) {
-        //     processAuth();
-        // }
+        if (messageUsername.length === 0 && messagePassword.length === 0 && password === confirm) {
+            try {
+                createUser(username, password, "auth");
+                navigate('/');
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    addAlert(error.message);
+                } else if (axios.isAxiosError(error)) {
+                    const errorMessage = error.response?.data || 'Ошибка соединения с сервером';
+                    addAlert(errorMessage);
+                } else {
+                    addAlert('Произошла ошибка');
+                }
+                setUsername("");
+                setPassword("");
+                setConfirm("");
+            }
+        }
     };
 
     return (
@@ -94,7 +116,7 @@ const SignUp = () => {
                                     width="16px"
                                     height="16px"
                                     viewBox="0 0 24 24"
-                                    xmlns="https://www.w3.org/2000/svg"
+                                    xmlns={"https://www.w3.org/2000/svg"}
                                 >
                                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
                                 </svg>
@@ -120,7 +142,7 @@ const SignUp = () => {
                                     width="16px"
                                     height="16px"
                                     viewBox="0 0 24 24"
-                                    xmlns="https://www.w3.org/2000/svg"
+                                    xmlns={"https://www.w3.org/2000/svg"}
                                 >
                                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
                                 </svg>
@@ -133,13 +155,22 @@ const SignUp = () => {
                             Показать пароль
                         </button>
                     </div>
+                    <div style={{ marginTop: 20 }} className="input-container">
+                        <span>
+                          Уже зарегистрированы? Вы можете выполнить{' '}
+                            <Link to="/sign-in">
+                            <b>вход</b>
+                          </Link>{' '}
+                            в аккаунт.
+                        </span>
+                    </div>
                     <div className="sign-buttons">
                         <button
                             style={{ marginLeft: "auto" }}
                             className="right-button"
                             onClick={handleNextButtonClick}
                         >
-                            Далее
+                            Зарегистрироваться
                         </button>
                     </div>
                 </div>

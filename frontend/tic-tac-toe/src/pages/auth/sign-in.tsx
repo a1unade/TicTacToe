@@ -1,10 +1,17 @@
 import {useState} from "react";
 import {makePasswordVisible} from "../../utils/button-handlers.ts";
 import {validatePassword, validateUsername} from "../../utils/validator.ts";
+import {useUserActions} from "../../hooks/use-actions.ts";
+import {useAlerts} from "../../hooks/use-alerts.ts";
+import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
 const SignIn = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
+    const {createUser} = useUserActions();
+    const {addAlert} = useAlerts();
 
     const handleNextButtonClick = async () => {
         const messagePassword = validatePassword(password);
@@ -27,9 +34,23 @@ const SignIn = () => {
             }, 500);
         }
 
-        // if (message.length === 0) {
-        //     processAuth();
-        // }
+        if (messagePassword.length === 0 && messageUsername.length === 0) {
+            try {
+                createUser(username, password, "login");
+                navigate('/');
+            } catch (error: unknown) {
+                if (error instanceof Error) {
+                    addAlert(error.message);
+                } else if (axios.isAxiosError(error)) {
+                    const errorMessage = error.response?.data || 'Ошибка соединения с сервером';
+                    addAlert(errorMessage);
+                } else {
+                    addAlert('Произошла ошибка');
+                }
+                setUsername("");
+                setPassword("");
+            }
+        }
     };
 
     return (
@@ -96,8 +117,10 @@ const SignIn = () => {
                         </button>
                     </div>
                     <div className="sign-buttons">
+                        <button className="left-button" onClick={() => navigate('/sign-up')}>
+                            Создать аккаунт
+                        </button>
                         <button
-                            style={{ marginLeft: "auto" }}
                             className="right-button"
                             onClick={handleNextButtonClick}
                         >

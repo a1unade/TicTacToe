@@ -1,5 +1,3 @@
-/* istanbul ignore file */
-
 import axios from 'axios';
 
 // Axios-клиент для запросов к API
