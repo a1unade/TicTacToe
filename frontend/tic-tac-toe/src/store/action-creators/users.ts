@@ -59,3 +59,15 @@ export const createUserFromToken = (token: string) => {
         });
     };
 }
+
+// Удаление стейта пользователя, выход из аккаунта
+export const deleteUser = () => {
+    return (dispatch: Dispatch<UserAction>) => {
+        dispatch({
+            type: UserActionTypes.DELETE_USER
+        });
+
+        // Удаляем куку после выхода из аккаунта
+        document.cookie = 'jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    };
+}

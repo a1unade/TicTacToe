@@ -17,6 +17,7 @@ public class GetGamesQueryHandler : IHandler<GetGamesQuery, GamesList>
     {
         var query = _context.Rooms
             .Include(r => r.Player1)
+            .Include(r => r.Match)
             .OrderByDescending(r => r.Status == "Waiting" || r.Status == "InProgress" ? 1 : 0) 
             .ThenByDescending(r => r.CreatedAt); 
 
@@ -29,9 +30,11 @@ public class GetGamesQueryHandler : IHandler<GetGamesQuery, GamesList>
             {
                 Id = r.Id,
                 CreatorUserName = r.Player1.Name,
+                CreatorId = r.Player1.Id,
                 CreatedAt = r.CreatedAt,
                 Status = r.Status,
-                CanJoin = r.Status == "Waiting" 
+                CanJoin = r.Status == "Waiting" ,
+                MaxScore = r.Match.MaxScore,
             })
             .ToListAsync(cancellationToken);
 
