@@ -4,14 +4,16 @@ import {useParams} from "react-router-dom";
 import apiClient from "../../utils/api-client.ts";
 import {GameResponse} from "../../interfaces/game/game-response.ts";
 import {useSignalR} from "../../hooks/use-signalr.ts";
+import {useAlerts} from "../../hooks/use-alerts.ts";
 
 const Game = () => {
-    const {id} = useUserTypedSelector(state => state.user);
+    const {id, score} = useUserTypedSelector(state => state.user);
     const {roomId} = useParams<string>();
     const [game, setGame] = useState<GameResponse>();
     const [isXNext, setIsXNext] = useState(true);
     const [winningLine, setWinningLine] = useState<number[] | null>(null);
-    const {joinGame, sendMove, board, initializeBoard} = useSignalR()
+    const {addAlert} = useAlerts();
+    const {joinGame, sendMove, board, initializeBoard, gameMessage, gameStatus} = useSignalR()
 
     useEffect(() => {
         apiClient.get<GameResponse>(`Room/GetRoomById?roomId=${roomId}`)
@@ -21,7 +23,17 @@ const Game = () => {
                    initializeBoard(response.data.match.board);
                }
             });
-    }, [initializeBoard, game, setGame]);
+    }, [initializeBoard, game, setGame, roomId]);
+
+    useEffect(() => {
+        if (gameStatus === "GameOver" || gameStatus === "Draw") {
+            console.log("Игра окончена:", gameMessage);
+            const winnerData = calculateWinner(board);
+            if (winnerData) {
+                setWinningLine(winnerData.line);
+            }
+        }
+    }, [gameStatus, gameMessage]);
 
     const handleClick = async (index: number) => {
         if (board[index] || winningLine) return;
@@ -35,6 +47,21 @@ const Game = () => {
         if (winnerData) {
             setWinningLine(winnerData.line);
         }
+    };
+
+    const handleJoinGame = async () => {
+        if (!game) return;
+
+        const { firstPlayer, secondPlayer } = game;
+
+        if (firstPlayer.userId === id || secondPlayer?.userId === id) return;
+
+        if (score > parseInt(game.match.score)) {
+            addAlert("Ваш рейтинг слишком высок для этой комнаты!");
+            return;
+        }
+
+        await joinGame(id, roomId!);
     };
 
     const calculateWinner = (squares: Array<string | null>) => {
@@ -55,14 +82,20 @@ const Game = () => {
     if (!game)
         return null;
 
-    //const winnerData = calculateWinner(board);
-    //const winner = winnerData ? winnerData.winner : null;
-    //const currentPlayer = isXNext ? players[0] : players[1];
-    //const status = winner ? `Winner: ${winner}` : `Next player: ${currentPlayer.name} (${currentPlayer.symbol})`;
+    const isPlayerInGame = game.firstPlayer.userId === id || game.secondPlayer?.userId === id;
 
     return (
         <div className="game">
-            <button className={"main-button"} onClick={() => joinGame(id, roomId!)}>Присоединиться</button>
+            {!isPlayerInGame && (
+                <button className="main-button" onClick={handleJoinGame}>
+                    Присоединиться
+                </button>
+            )}
+            {gameStatus && (
+                <div className="game-over">
+                    <strong>{gameMessage}</strong>
+                </div>
+            )}
             <div className="players">
                 <div key={game.firstPlayer.userId} className="player">
                     <strong>{game.firstPlayer.name}</strong> (Rating: {game.firstPlayer.score})

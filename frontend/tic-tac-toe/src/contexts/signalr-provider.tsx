@@ -22,6 +22,8 @@ export interface SignalRContextProps {
     board: Array<string | null>;
     setBoard: React.Dispatch<React.SetStateAction<Array<string | null>>>;
     initializeBoard: (boardString: string) => void;
+    gameStatus: string | null;
+    gameMessage: string | null;
 }
 
 export const SignalRContext = createContext<SignalRContextProps | undefined>(undefined);
@@ -29,6 +31,8 @@ export const SignalRContext = createContext<SignalRContextProps | undefined>(und
 export const SignalRProvider:React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const connectionRef = useRef<HubConnection | null>(null);
     const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
+    const [gameStatus, setGameStatus] = useState<string | null>(null);
+    const [gameMessage, setGameMessage] = useState<string | null>(null);
 
     const startConnection = async () => {
         if (connectionRef.current && connectionRef.current.state === HubConnectionState.Connected) {
@@ -49,6 +53,13 @@ export const SignalRProvider:React.FC<{ children: React.ReactNode }> = ({ childr
         newConnection.on("ReceiveMove", (data) => {
             console.log("Received Move:", data);
             updateBoard(data.board);
+        });
+
+        newConnection.on("GameEnded", (data) => {
+            console.log("Игра завершена:", data);
+            updateBoard("---------");
+            setGameStatus(data.Status);
+            setGameMessage(data.Message);
         });
 
         try {
@@ -143,7 +154,7 @@ export const SignalRProvider:React.FC<{ children: React.ReactNode }> = ({ childr
     }, []);
 
     return (
-        <SignalRContext.Provider value={{ connectionRef, createOrJoinRoom, joinRoom, joinGame, sendMove, board, setBoard, initializeBoard }}>
+        <SignalRContext.Provider value={{ connectionRef, createOrJoinRoom, joinRoom, joinGame, sendMove, board, setBoard, initializeBoard, gameStatus, gameMessage }}>
             {children}
         </SignalRContext.Provider>
     );
