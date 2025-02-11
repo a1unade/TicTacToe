@@ -1,6 +1,8 @@
+using TicTacToe.Domain.MongoEntity;
+
 namespace TicTacToe.Application.DTOs;
 
 public class TopUsers
 {
-    public List<UsersDto> UsersDtos { get; set; } = default!;
+    public List<UserScore> UsersDtosScores { get; set; } = default!;
 }

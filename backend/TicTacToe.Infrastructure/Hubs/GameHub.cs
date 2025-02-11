@@ -157,7 +157,7 @@ public class GameHub : Hub
             await Clients.Group(move.RoomId.ToString()).SendAsync("GameEnded", new
             {
                 Board = board,
-                Status = "GameOver",
+                Status = status,
                 Message = $"Победитель: {nextPlayer}"
             });
             
@@ -179,7 +179,7 @@ public class GameHub : Hub
             await Clients.Group(move.RoomId.ToString()).SendAsync("GameEnded", new
             {
                 Board = board,
-                Status = "Draw",
+                Status = status,
                 Message = "Ничья!"
             });
             

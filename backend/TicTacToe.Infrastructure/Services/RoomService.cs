@@ -7,10 +7,12 @@ namespace TicTacToe.Infrastructure.Services;
 public class RoomService : IRoomService
 {
     private readonly IDbContext _context;
+    private readonly IUserScoreService _userScoreService;
 
-    public RoomService(IDbContext context)
+    public RoomService(IDbContext context, IUserScoreService userScoreService)
     {
         _context = context;
+        _userScoreService = userScoreService;
     }
 
     public async Task<Guid?> CreateRoom(ConnectionDto connectionDto)
@@ -70,6 +72,8 @@ public class RoomService : IRoomService
             return ("Пользователь не найден", false);
         }
         
+        var userScore = await _userScoreService.GetByUserIdPostgresAsync(player2.Id, default);
+        
         if (room == null || room.Player2Id != null)
         {
             return ("комната налл или уже заполнена", false); 
@@ -82,7 +86,7 @@ public class RoomService : IRoomService
         
         if (match != null)
         {
-            if (match.MaxScore < player2.Score)
+            if (match.MaxScore < userScore?.Score)
             {
                 return ("У игрока рейтинг больше чем у комнаты", false);
             }

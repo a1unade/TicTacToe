@@ -1,3 +1,5 @@
+using TicTacToe.Domain.MongoEntity;
+
 namespace TicTacToe.Application.DTOs;
 
 public class UsersDto
