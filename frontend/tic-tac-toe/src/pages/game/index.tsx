@@ -3,15 +3,16 @@ import {useUserTypedSelector} from "../../hooks/use-typed-selector.ts";
 import {useParams} from "react-router-dom";
 import apiClient from "../../utils/api-client.ts";
 import {GameResponse} from "../../interfaces/game/game-response.ts";
+import {useSignalR} from "../../hooks/use-signalr.ts";
 
-const Game = (props: { joinGame: (userId: string, roomId: string) => Promise<void> }) => {
-    const {joinGame} = props;
+const Game = () => {
     const {id} = useUserTypedSelector(state => state.user);
     const {roomId} = useParams<string>();
     const [game, setGame] = useState<GameResponse>();
     const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
     const [isXNext, setIsXNext] = useState(true);
     const [winningLine, setWinningLine] = useState<number[] | null>(null);
+    const {joinGame, sendMove} = useSignalR()
 
     useEffect(() => {
         apiClient.get<GameResponse>(`Room/GetRoomById?roomId=${roomId}`)
@@ -28,6 +29,8 @@ const Game = (props: { joinGame: (userId: string, roomId: string) => Promise<voi
         newBoard[index] = isXNext ? 'X' : 'O';
         setBoard(newBoard);
         setIsXNext(!isXNext);
+
+        sendMove(id, roomId!, index);
 
         const winnerData = calculateWinner(newBoard);
         if (winnerData) {
@@ -65,8 +68,8 @@ const Game = (props: { joinGame: (userId: string, roomId: string) => Promise<voi
                 <div key={game.firstPlayer.userId} className="player">
                     <strong>{game.firstPlayer.name}</strong> (Rating: {game.firstPlayer.score})
                 </div>
-                <div key={game.secondPlayer.userId} className="player">
-                    <strong>{game.secondPlayer.name}</strong> (Rating: {game.secondPlayer.score})
+                <div key={game.secondPlayer?.userId} className="player">
+                    <strong>{game.secondPlayer?.name}</strong> (Rating: {game.secondPlayer?.score})
                 </div>
             </div>
             <div className="board">
