@@ -66,7 +66,20 @@ public class GameHub : Hub
 
     public async Task<string> JoinRoom(JoinDto joinDto)
     {
+        await Clients.Group(joinDto.RoomId.ToString()).SendAsync("Info", new
+        {
+            Message = "1",
+            RoomId = joinDto.RoomId
+        });
+        
         var room = await _roomService.GetRoomByIdAsync(joinDto.RoomId);
+        
+        await Clients.Group(joinDto.RoomId.ToString()).SendAsync("Info", new
+        {
+            Message = "2",
+            RoomId = joinDto.RoomId
+        });
+        
         if (room == null)
         {
             await Clients.Group(joinDto.RoomId.ToString()).SendAsync("Info", new
