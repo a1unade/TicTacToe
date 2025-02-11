@@ -15,6 +15,8 @@ import {jwtDecode} from "jwt-decode";
 import {JWTTokenDecoded} from "./interfaces/jwt-token/jwt-decoded.ts";
 import {useUserActions} from "./hooks/use-actions.ts";
 import {useUserTypedSelector} from "./hooks/use-typed-selector.ts";
+import {SignalRProvider} from "./contexts/signalr-provider.tsx";
+import {useSignalR} from "./hooks/use-signalr.ts";
 
 const ProtectedRoute = ({ element }: { element: JSX.Element }) => {
     const { id } = useUserTypedSelector(state => state.user);
@@ -30,6 +32,7 @@ export const App = () => {
     const { alerts, removeAlert } = useAlerts();
     const {createUserFromToken} = useUserActions();
     const [isAuthChecked, setIsAuthChecked] = useState(false);
+    const {joinGame} = useSignalR()
 
     useEffect(() => {
         const authCookie = document.cookie.split('; ').find((row) => row.startsWith('jwt='));
@@ -67,7 +70,7 @@ export const App = () => {
             <Routes>
                 <Route path={"/sign-in"} element={<SignIn />} />
                 <Route path={"/sign-up"} element={<SignUp />} />
-                <Route path="/game/:id" element={<ProtectedRoute element={<Game />} />} />
+                <Route path="/game/:roomId" element={<ProtectedRoute element={<Game joinGame={joinGame} />} />} />
                 <Route path="/" element={<ProtectedRoute element={<Main />} />} />
             </Routes>
         </>
@@ -76,10 +79,12 @@ export const App = () => {
 
 createRoot(document.getElementById('root')!).render(
     <Provider store={store}>
-        <AlertProvider>
-            <BrowserRouter>
-                <App />
-            </BrowserRouter>
-        </AlertProvider>
+        <SignalRProvider>
+            <AlertProvider>
+                <BrowserRouter>
+                    <App />
+                </BrowserRouter>
+            </AlertProvider>
+        </SignalRProvider>
     </Provider>
 )
