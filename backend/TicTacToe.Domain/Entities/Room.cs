@@ -1,14 +1,22 @@
+using TicTacToe.Domain.Common;
+
 namespace TicTacToe.Domain.Entities;
 
-public class Room
+public class Room : BaseEntity
 {
-    public Guid Id { get; set; }
-    
-    public Guid Player1Id { get; set; } 
-    
-    public Guid Player2Id { get; set; }
+    public Guid Player1Id { get; set; }
+    public User Player1 { get; set; }
 
-    public string Status { get; set; } = default!;
+    public Guid? Player2Id { get; set; }
+    public User? Player2 { get; set; }
+
+    public Guid? MatchId { get; set; }
+    public Match? Match { get; set; }
+
+    public string Status { get; set; }
+    public DateTime CreatedAt { get; set; }
     
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow; 
+    public Guid ChatId { get; set; }
+
+    public ChatHistory ChatHistory { get; set; } = default!;
 }

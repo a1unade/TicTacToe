@@ -8,14 +8,23 @@ public class MatchConfiguration : IEntityTypeConfiguration<Match>
 {
     public void Configure(EntityTypeBuilder<Match> builder)
     {
-        builder.HasKey(x => x.Id);
+        builder.HasKey(m => m.Id);
 
-        builder.Property(x => x.Status);
+        // Настройка связи с Room
+        builder.HasOne(m => m.Room)
+            .WithOne(r => r.Match)
+            .HasForeignKey<Match>(m => m.RoomId) // Внешний ключ в Match
+            .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Property(x => x.IsStarted);
+        builder.Property(m => m.Status)
+            .HasMaxLength(50)
+            .IsRequired();
 
-        builder.Property(x => x.MaxScore);
+        builder.Property(m => m.CreatedAt)
+            .IsRequired();
 
-        builder.Property(x => x.CreatedAt);
+        builder.Property(m => m.Board)
+            .HasMaxLength(9)
+            .IsRequired();
     }
 }

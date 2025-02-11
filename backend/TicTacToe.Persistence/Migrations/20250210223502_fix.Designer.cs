@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TicTacToe.Persistence.EfContext;
@@ -11,9 +12,11 @@ using TicTacToe.Persistence.EfContext;
 namespace TicTacToe.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250210223502_fix")]
+    partial class fix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,9 +31,6 @@ namespace TicTacToe.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("RoomId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
 
@@ -38,9 +38,6 @@ namespace TicTacToe.Persistence.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RoomId")
-                        .IsUnique();
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -62,8 +59,7 @@ namespace TicTacToe.Persistence.Migrations
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("text");
 
                     b.Property<TimeOnly>("Time")
                         .HasColumnType("time without time zone");
@@ -128,9 +124,6 @@ namespace TicTacToe.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ChatId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -190,19 +183,11 @@ namespace TicTacToe.Persistence.Migrations
 
             modelBuilder.Entity("TicTacToe.Domain.Entities.ChatHistory", b =>
                 {
-                    b.HasOne("TicTacToe.Domain.Entities.Room", "Room")
-                        .WithOne("ChatHistory")
-                        .HasForeignKey("TicTacToe.Domain.Entities.ChatHistory", "RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TicTacToe.Domain.Entities.User", "User")
                         .WithOne("ChatHistory")
                         .HasForeignKey("TicTacToe.Domain.Entities.ChatHistory", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Room");
 
                     b.Navigation("User");
                 });
@@ -262,9 +247,6 @@ namespace TicTacToe.Persistence.Migrations
 
             modelBuilder.Entity("TicTacToe.Domain.Entities.Room", b =>
                 {
-                    b.Navigation("ChatHistory")
-                        .IsRequired();
-
                     b.Navigation("Match");
                 });
 

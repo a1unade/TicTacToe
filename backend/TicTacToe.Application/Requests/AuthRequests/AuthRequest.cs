@@ -1,17 +1,18 @@
-namespace TicTacToe.Application.Requests;
+namespace TicTacToe.Application.Requests.AuthRequests;
 
-public class LoginRequest
+public class AuthRequest
 {
-    public LoginRequest()
+    public AuthRequest()
     {
         
     }
 
-    public LoginRequest(LoginRequest request)
+    public AuthRequest(AuthRequest request)
     {
         Name = request.Name;
         Password = request.Password;
     }
+
     public string Name { get; set; } = default!;
 
     public string Password { get; set; } = default!;

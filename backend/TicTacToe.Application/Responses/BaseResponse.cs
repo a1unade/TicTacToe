@@ -1,6 +1,6 @@
 namespace TicTacToe.Application.Responses;
 
-public abstract class BaseResponse
+public class BaseResponse
 {
     public bool IsSuccessfully { get; set; } 
     

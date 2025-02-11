@@ -14,8 +14,22 @@ public class ChatHistoryConfiguration : IEntityTypeConfiguration<ChatHistory>
             .HasColumnType("date")
             .IsRequired();
 
+        // Настройка связи с Room
+        builder.HasOne(ch => ch.Room)
+            .WithOne(r => r.ChatHistory)
+            .HasForeignKey<ChatHistory>(ch => ch.RoomId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Настройка связи с User
         builder.HasOne(ch => ch.User)
-            .WithOne(x => x.ChatHistory)
-            .HasForeignKey<ChatHistory>(ch => ch.UserId);
+            .WithOne(u => u.ChatHistory)
+            .HasForeignKey<ChatHistory>(ch => ch.UserId) // Указываем, что ChatHistory зависит от User
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Настройка связи с ChatMessages
+        builder.HasMany(ch => ch.ChatMessages)
+            .WithOne(cm => cm.ChatHistory)
+            .HasForeignKey(cm => cm.ChatHistoryId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

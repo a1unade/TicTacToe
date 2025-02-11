@@ -11,4 +11,9 @@ public class ChatHistory : BaseEntity
     public User User { get; set; } = default!;
 
     public ICollection<ChatMessage> ChatMessages { get; set; } = default!;
+    
+    public Guid RoomId { get; set; }
+
+    public Room Room { get; set; } = default!;
+
 }
