@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using TicTacToe.Domain.Common;
 
 namespace TicTacToe.Domain.Entities;
@@ -11,6 +12,8 @@ public class Room : BaseEntity
     public User? Player2 { get; set; }
 
     public Guid? MatchId { get; set; }
+    
+    [JsonIgnore]
     public Match? Match { get; set; }
 
     public string Status { get; set; }

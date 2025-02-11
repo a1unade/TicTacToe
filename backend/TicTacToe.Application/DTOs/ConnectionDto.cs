@@ -4,6 +4,8 @@ public class ConnectionDto
 {
     public Guid Player1 { get; set; }
     
+    public Guid Player2 { get; set; }
+    
     public int? MaxScore { get; set; }
     
     public Guid? RoomId { get; set; }
