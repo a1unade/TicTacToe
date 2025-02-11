@@ -28,7 +28,19 @@ public class GetRoomByIdQueryHandler : IHandler<GetRoomByIdQuery, RoomForUi>
         }
 
         var firstUserScore = await _userScoreService.GetByUserIdPostgresAsync(room.Player1.Id, cancellationToken);
-        var secondUserScore = await _userScoreService.GetByUserIdPostgresAsync(room.Player2.Id, cancellationToken);
+        UsersDto? secondPlayerDto = null;
+
+        if (room.Player2 != null)
+        {
+            var secondUserScore = await _userScoreService.GetByUserIdPostgresAsync(room.Player2.Id, cancellationToken);
+            secondPlayerDto = new UsersDto
+            {
+                Score = secondUserScore?.Score ?? 0,
+                Name = room.Player2.Name,
+                UserId = room.Player2.Id,
+                Symbol = 'O'
+            };
+        }
 
         return new RoomForUi
         {
@@ -41,13 +53,7 @@ public class GetRoomByIdQueryHandler : IHandler<GetRoomByIdQuery, RoomForUi>
                 UserId = room.Player1?.Id ?? Guid.Empty,
                 Symbol = 'X'
             },
-            SecondPlayer = room.Player2 != null ? new UsersDto
-            {
-                Score = secondUserScore?.Score ?? 0,
-                Name = room.Player2.Name,
-                UserId = room.Player2.Id,
-                Symbol = 'O'
-            } : null!, 
+            SecondPlayer = secondPlayerDto!, 
             Match = room.Match != null ? new MatchDto
             {
                 Board = room.Match.Board,
@@ -58,5 +64,4 @@ public class GetRoomByIdQueryHandler : IHandler<GetRoomByIdQuery, RoomForUi>
             } : null!
         };
     }
-
 }
