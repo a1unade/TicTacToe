@@ -11,7 +11,6 @@ public class MatchService : IMatchService
     private readonly IDbContext _context;
     private readonly IBus _bus;
 
-
     public MatchService(IDbContext context, IBus bus)
     {
         _context = context;
@@ -77,32 +76,14 @@ public class MatchService : IMatchService
     {
         await _bus.Publish(new UpdateScoreDto { WinnerId = winnerId, LoserId = loserId });
     }
-
-    private async Task NotifyDraw(Guid roomId)
-    {
-        
-        /// ТУт можно добавить монго или ребит 
-
-        
-        
-        var room = await _context.Rooms
-            .Include(r => r.Player1)
-            .Include(r => r.Player2)
-            .FirstOrDefaultAsync(r => r.Id == roomId);
-
-        if (room == null) return;
-
-        // Отправляем уведомление о ничьей
-        // Вызываем метод в хабе через интерфейс для отправки уведомлений клиенту
-    }
-
+    
     private static string? CheckWinner(string board)
     {
         int[][] winPatterns =
         {
-            new[] { 0, 1, 2 }, new[] { 3, 4, 5 }, new[] { 6, 7, 8 }, // Горизонтали
-            new[] { 0, 3, 6 }, new[] { 1, 4, 7 }, new[] { 2, 5, 8 }, // Вертикали
-            new[] { 0, 4, 8 }, new[] { 2, 4, 6 } // Диагонали
+            new[] { 0, 1, 2 }, new[] { 3, 4, 5 }, new[] { 6, 7, 8 }, 
+            new[] { 0, 3, 6 }, new[] { 1, 4, 7 }, new[] { 2, 5, 8 }, 
+            new[] { 0, 4, 8 }, new[] { 2, 4, 6 } 
         };
 
         foreach (var pattern in winPatterns)
@@ -137,11 +118,9 @@ public class MatchService : IMatchService
             MaxScore = room.Match.MaxScore 
         };
 
-        // Сохраняем новый матч
         _context.Matches.Add(newMatch);
         await _context.SaveChangesAsync();
 
-        // Обновляем комнату, чтобы она ссылается на новый матч
         room.Match = newMatch;
 
         await _context.SaveChangesAsync();

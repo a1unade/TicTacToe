@@ -160,6 +160,8 @@ public class GameHub : Hub
                 Status = status,
                 Message = message
             });
+            
+            await _matchService.StartNewRound(move.RoomId);
         }
     }
 }
