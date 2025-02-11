@@ -1,19 +1,26 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import {useUserTypedSelector} from "../../hooks/use-typed-selector.ts";
 import {useParams} from "react-router-dom";
+import apiClient from "../../utils/api-client.ts";
+import {GameResponse} from "../../interfaces/game/game-response.ts";
 
 const Game = (props: { joinGame: (userId: string, roomId: string) => Promise<void> }) => {
     const {joinGame} = props;
     const {id} = useUserTypedSelector(state => state.user);
     const {roomId} = useParams<string>();
+    const [game, setGame] = useState<GameResponse>();
     const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
     const [isXNext, setIsXNext] = useState(true);
     const [winningLine, setWinningLine] = useState<number[] | null>(null);
 
-    const players = [
-        { name: 'Player 1', symbol: 'X', rating: 1200 },
-        { name: 'Player 2', symbol: 'O', rating: 1150 }
-    ];
+    useEffect(() => {
+        apiClient.get<GameResponse>(`Room/GetRoomById?roomId=${roomId}`)
+            .then((response) => {
+               if (response.status === 200) {
+                   setGame(response.data);
+               }
+            });
+    })
 
     const handleClick = (index: number) => {
         if (board[index] || winningLine) return;
@@ -43,22 +50,25 @@ const Game = (props: { joinGame: (userId: string, roomId: string) => Promise<voi
         return null;
     };
 
-    const winnerData = calculateWinner(board);
-    const winner = winnerData ? winnerData.winner : null;
-    const currentPlayer = isXNext ? players[0] : players[1];
-    const status = winner ? `Winner: ${winner}` : `Next player: ${currentPlayer.name} (${currentPlayer.symbol})`;
+    if (!game)
+        return null;
+
+    //const winnerData = calculateWinner(board);
+    //const winner = winnerData ? winnerData.winner : null;
+    //const currentPlayer = isXNext ? players[0] : players[1];
+    //const status = winner ? `Winner: ${winner}` : `Next player: ${currentPlayer.name} (${currentPlayer.symbol})`;
 
     return (
         <div className="game">
             <button className={"main-button"} onClick={() => joinGame(id, roomId!)}>Присоединиться</button>
             <div className="players">
-                {players.map(player => (
-                    <div key={player.symbol} className="player">
-                        <strong>{player.name}</strong> (Rating: {player.rating})
-                    </div>
-                ))}
+                <div key={game.firstPlayer.userId} className="player">
+                    <strong>{game.firstPlayer.name}</strong> (Rating: {game.firstPlayer.score})
+                </div>
+                <div key={game.secondPlayer.userId} className="player">
+                    <strong>{game.secondPlayer.name}</strong> (Rating: {game.secondPlayer.score})
+                </div>
             </div>
-            <h1 className="status">{status}</h1>
             <div className="board">
                 {board.map((cell, index) => (
                     <button
