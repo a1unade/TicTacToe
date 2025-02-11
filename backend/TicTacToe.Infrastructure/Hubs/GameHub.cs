@@ -30,38 +30,14 @@ public class GameHub : Hub
             {
                 PlayerId = connectionDto.Player1,
                 Role = "Player1",
-                RoomId = roomId
+                RoomId = roomId,
+                Message = "$Room created and connected with ID: {roomId}"
             });
 
-            return $"Room created and connected with ID: {roomId}";
+            return roomId.ToString()!;
         }
 
-
-        // Подключаемся к существующей комнате
-        var room = await _roomService.GetRoomByIdAsync((Guid)connectionDto.RoomId);
-        if (room == null)
-        {
-            await Clients.Group(connectionDto.RoomId.ToString()!).SendAsync("Info", new
-            {
-                Message = "Room not found",
-                PlayerId = connectionDto.Player1,
-                Role = "Player1",
-                RoomId = connectionDto.RoomId,
-                Math = room.Match
-            });
-            return "Room not found";
-        }
-        await Clients.Group(connectionDto.RoomId.ToString()!).SendAsync("Info", new
-        {
-            PlayerId = connectionDto.Player1,
-            Role = "Player1",
-            RoomId = connectionDto.RoomId,
-            Math = room.Match,
-            Player2 = room.Player2,
-            Message = "Мы нашли комнату и пытаемя закинуть чела"
-        });
-
-
+        return connectionDto.RoomId.ToString()!;
         // // Проверяем, есть ли место для второго игрока
         // if (room.Player2Id == null)
         // {
@@ -86,14 +62,40 @@ public class GameHub : Hub
         // }
 
         // Если комната заполнена, подключаемся как зритель
-        await Groups.AddToGroupAsync(Context.ConnectionId, connectionDto.RoomId.ToString()!);
-        await Clients.Group(room.Id.ToString()).SendAsync("INfo", new
+    }
+
+    public async Task<string> JoinRoom(JoinDto joinDto)
+    {
+        var room = await _roomService.GetRoomByIdAsync(joinDto.RoomId);
+        if (room == null)
         {
-            PlayerId = connectionDto.Player1,
-            Role = "Player2",
-            RoomId = room.Id
+            await Clients.Group(joinDto.RoomId.ToString()).SendAsync("Info", new
+            {
+                Message = "Room not found",
+                RoomId = joinDto.RoomId
+            });
+            
+            return "Room not found";
+        }
+        
+        await Clients.Group(joinDto.RoomId.ToString()).SendAsync("Info", new
+        {
+            Room = room,
+            Creator = room.Player1,
+            Role = "Player1",
+            RoomId = joinDto.RoomId,
+            Math = room.Match,
+            Message = "Мы нашли комнату и пытаемя закинуть чела"
         });
-        return $"Connected to room as Spectator with ID: {connectionDto.RoomId}";
+        
+        await Groups.AddToGroupAsync(Context.ConnectionId, joinDto.RoomId.ToString());
+        await Clients.Group(room.Id.ToString()).SendAsync("Info", new
+        {
+            RoomId = room.Id,
+            Message = "Success"
+        });
+        return $"Connected to room as Spectator with ID: {joinDto.RoomId}";
+
     }
 
     public async Task NotifyMove(Guid roomId, int position)
