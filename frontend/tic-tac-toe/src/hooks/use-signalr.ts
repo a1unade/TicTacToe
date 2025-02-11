@@ -4,8 +4,12 @@ import { HubConnectionBuilder, HubConnection, HubConnectionState } from "@micros
 interface GameConnection {
     Player1: string;
     RoomId: string | null;
-    Player2Score?: number;
     MaxScore?: number;
+}
+
+interface JoinRoomConnection {
+    Player: string;
+    RoomId: string;
 }
 
 interface useSignalRProps {
@@ -14,7 +18,7 @@ interface useSignalRProps {
     setMove: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const useSignalR = ({ setRoomId, setGameStatus, setMove }: useSignalRProps) => {
+export const useSignalR = ({ setRoomId }: useSignalRProps) => {
     const connectionRef = useRef<HubConnection | null>(null);
 
     const startConnection = async () => {
@@ -24,31 +28,13 @@ export const useSignalR = ({ setRoomId, setGameStatus, setMove }: useSignalRProp
         }
 
         const newConnection = new HubConnectionBuilder()
-            .withUrl("http://localhost:8080/gameHub", {
-                accessTokenFactory: () => localStorage.getItem("token") || "", // Поддержка авторизации
-            })
-            .withAutomaticReconnect()
+            .withUrl("http://localhost:5026/gameHub")
             .build();
 
         connectionRef.current = newConnection;
 
-        newConnection.on("RequestToJoin", (connectionId: string, player1: string) => {
-            console.log(`Запрос на вход: комната ${connectionId}, Игрок: ${player1}`);
-        });
-
-        newConnection.on("MoveMade", (position: number) => {
-            console.log(`Ход сделан: ${position}`);
-            setMove(position);
-        });
-
-        newConnection.on("GameStatusUpdated", (status: string) => {
-            console.log(`Статус игры обновлён: ${status}`);
-            setGameStatus(status);
-        });
-
-        newConnection.onclose(async () => {
-            console.warn("Соединение разорвано. Переподключение...");
-            setTimeout(startConnection, 5000); // Автоматическое переподключение через 5 сек
+        newConnection.on("Info", (data) => {
+            console.log("Info:", data);
         });
 
         try {
@@ -56,17 +42,17 @@ export const useSignalR = ({ setRoomId, setGameStatus, setMove }: useSignalRProp
             console.log("Подключение установлено");
         } catch (error) {
             console.error("Ошибка подключения:", error);
-            setTimeout(startConnection, 5000); // Попытка переподключения через 5 сек
+            setTimeout(startConnection, 5000);
         }
     };
 
-    const createOrJoinRoom = async (userId: string, roomId: string | null, maxScore?: number, player2score?: number) => {
+    const createOrJoinRoom = async (userId: string, roomId: string | null, maxScore?: number) => {
         if (!connectionRef.current || connectionRef.current.state !== HubConnectionState.Connected) {
             console.error("Нет соединения с сервером");
             return;
         }
 
-        const connection: GameConnection = { Player1: userId, RoomId: roomId, Player2Score: player2score, MaxScore: maxScore };
+        const connection: GameConnection = { Player1: userId, RoomId: roomId, MaxScore: maxScore };
         console.log(connection);
         try {
             const roomIdReturned = await connectionRef.current.invoke("CreateOrJoinRoom", connection);
@@ -77,62 +63,37 @@ export const useSignalR = ({ setRoomId, setGameStatus, setMove }: useSignalRProp
         }
     };
 
-    const confirmJoinRoom = async (roomId: string, playerId: string, isConfirmed: boolean) => {
+
+    const joinRoom = async (userId: string, roomId: string) => {
         if (!connectionRef.current || connectionRef.current.state !== HubConnectionState.Connected) {
             console.error("Нет соединения с сервером");
             return;
         }
 
+        const connection: JoinRoomConnection = { Player: userId, RoomId: roomId };
+
+        console.log("Отправляем объект в JoinRoom:", JSON.stringify(connection));
+
         try {
-            await connectionRef.current.invoke("ConfirmJoinRoom", roomId, playerId, isConfirmed);
+            const roomIdReturned = await connectionRef.current.invoke("JoinRoom", connection);
+            console.log("Ответ от сервера:", roomIdReturned);
         } catch (error) {
-            console.error("Ошибка подтверждения входа в комнату:", error);
+            console.error("Ошибка при входе в комнату:", error);
         }
     };
 
-    const sendMove = async (roomId: string, position: number, playerId: string) => {
-        if (!connectionRef.current || connectionRef.current.state !== HubConnectionState.Connected) {
-            console.error("Нет соединения с сервером");
-            return;
-        }
-
-        try {
-            await connectionRef.current.invoke("SendMove", roomId, position, playerId);
-        } catch (error) {
-            console.error("Ошибка отправки хода:", error);
-        }
-    };
-
-    const leaveRoom = async (roomId: string | null) => {
-        if (!connectionRef.current || connectionRef.current.state !== HubConnectionState.Connected) {
-            console.error("Нет соединения с сервером");
-            return;
-        }
-
-        try {
-            await connectionRef.current.invoke("LeaveGame", roomId);
-            setRoomId(null);
-        } catch (error) {
-            console.error("Ошибка выхода из комнаты:", error);
-        }
-    };
 
     useEffect(() => {
         startConnection();
 
         return () => {
-            if (connectionRef.current?.state === HubConnectionState.Connected) {
-                console.log("Отключение от сервера...");
-                connectionRef.current?.stop();
-            }
+            connectionRef.current?.stop();
         };
     }, []);
 
     return {
         createOrJoinRoom,
-        confirmJoinRoom,
-        sendMove,
-        leaveRoom,
+        joinRoom,
         connectionRef,
     };
 };

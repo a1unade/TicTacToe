@@ -26,7 +26,7 @@ const Main: React.FC = () => {
     console.log("user: " + id)
     console.log(gameStatus, move)
 
-    const { createOrJoinRoom } = useSignalR({
+    const { createOrJoinRoom, joinRoom } = useSignalR({
         setRoomId,
         setGameStatus,
         setMove,
@@ -100,9 +100,10 @@ const Main: React.FC = () => {
         }
     };
 
-    const handleGameJoin = (gameId: string, maxScore: number) => {
-        navigate(`/game/${gameId}`);
-        createOrJoinRoom(id, gameId, maxScore, parseInt(score.toString()))
+    const handleGameJoin = (gameId: string) => {
+        //navigate(`/game/${gameId}`);
+
+        joinRoom(id, gameId)
             .then(r => console.log(r))
     }
 
@@ -125,7 +126,7 @@ const Main: React.FC = () => {
                     <p>На данный момент нет доступных игр.</p>
                 ) : (
                     rooms.map(room => (
-                        <div key={room.id} className={`game-item ${room.status}`} onClick={() => handleGameJoin(room.id, room.maxScore)}>
+                        <div key={room.id} className={`game-item ${room.status}`} onClick={() => handleGameJoin(room.id)}>
                             <p>Создатель: {room.creatorUserName}</p>
                             <p>Дата: {new Date(room.createdAt).toLocaleString()}</p>
                             <p>Статус: {getStatusText(room.status)}</p>
