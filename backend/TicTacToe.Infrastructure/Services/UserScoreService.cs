@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using TicTacToe.Application.Interfaces;
 using TicTacToe.Domain.MongoEntity;
@@ -17,12 +16,7 @@ public class UserScoreService : IUserScoreService
         var mongoData = mongoClient.GetDatabase(mongoDatabaseSettings.Value.DatabaseName);
         _mongo = mongoData.GetCollection<UserScore>(mongoDatabaseSettings.Value.CollectionName);
     }
-
-    public async Task<List<UserScore>> GetAsync(CancellationToken cancellationToken)
-    {
-        return await _mongo.Find(_ => true).ToListAsync(cancellationToken);
-    }
-
+    
     public async Task<UserScore?> GetAsync(string id, CancellationToken cancellationToken)
     {
         return await _mongo.Find(user => user.Id.ToString() == id).FirstOrDefaultAsync(cancellationToken);
@@ -33,14 +27,17 @@ public class UserScoreService : IUserScoreService
         await _mongo.InsertOneAsync(newUserScore, cancellationToken: cancellationToken);
     }
 
-    public async Task UpdateAsync(ObjectId id, UserScore updatedUserScore, CancellationToken cancellationToken)
+    public async Task UpdateScoreAsync(Guid userIdPostgres, int newScore, CancellationToken cancellationToken)
     {
-        await _mongo.ReplaceOneAsync(user => user.Id == id, updatedUserScore, cancellationToken: cancellationToken);
-    }
+        var filter = Builders<UserScore>.Filter.Eq(u => u.UserIdPostgres, userIdPostgres);
+        var update = Builders<UserScore>.Update.Set(u => u.Score, newScore);
 
-    public async Task RemoveAsync(string id, CancellationToken cancellationToken)
-    {
-        await _mongo.DeleteOneAsync(user => user.Id.ToString() == id, cancellationToken);
+        var options = new FindOneAndUpdateOptions<UserScore>
+        {
+            IsUpsert = true 
+        };
+
+        await _mongo.FindOneAndUpdateAsync(filter, update, options, cancellationToken);
     }
     
     public async Task<UserScore?> GetByUserIdPostgresAsync(Guid userIdPostgres, CancellationToken cancellationToken)

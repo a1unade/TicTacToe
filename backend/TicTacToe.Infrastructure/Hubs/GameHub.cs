@@ -137,12 +137,12 @@ public class GameHub : Hub
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
     }
-    
+
     public async Task SendMove(MoveDto move)
     {
         var (board, status, nextPlayer, message) = await _matchService.ProcessMove(move);
 
-        // Отправляем обновление всем в комнате
+        // Отправляем ход всем в комнате
         await Clients.Group(move.RoomId.ToString()).SendAsync("ReceiveMove", new
         {
             Board = board,
@@ -151,48 +151,16 @@ public class GameHub : Hub
             Message = message
         });
 
-        if (status == "GameOver")
+        // Если игра закончена, уведомляем игроков
+        if (status == "GameOver" || status == "Draw")
         {
-            // Отправляем уведомление о победителе
             await Clients.Group(move.RoomId.ToString()).SendAsync("GameEnded", new
             {
                 Board = board,
                 Status = status,
-                Message = $"Победитель: {nextPlayer}"
-            });
-            
-            var (newBoard, newStatus, playerId, symbol) = await _matchService.StartNewRound(move.RoomId);
-            
-            await Clients.Group(move.RoomId.ToString()).SendAsync("NewRound", new
-            {
-                Message = "Начинаем новый раунд!",
-                Board = newBoard,
-                Status = newStatus,
-                CurrentPlayer = playerId,
-                Symbol = symbol
-            });
-        }
-
-        if (status == "Draw")
-        {
-            // Отправляем уведомление о ничьей
-            await Clients.Group(move.RoomId.ToString()).SendAsync("GameEnded", new
-            {
-                Board = board,
-                Status = status,
-                Message = "Ничья!"
-            });
-            
-            var (newBoard, newStatus, playerId, symbol) = await _matchService.StartNewRound(move.RoomId);
-            
-            await Clients.Group(move.RoomId.ToString()).SendAsync("NewRound", new
-            {
-                Message = "Начинаем новый раунд!",
-                Board = newBoard,
-                Status = newStatus,
-                CurrentPlayer = playerId,
-                Symbol = symbol
+                Message = message
             });
         }
     }
 }
+
