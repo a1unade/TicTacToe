@@ -54,6 +54,7 @@ public class RoomService : IRoomService
         return await _context.Rooms
             .AsNoTracking()
             .Include(x => x.Player1)
+            .Include(x => x.Player2)
             .Include(r => r.Match) // Подгружаем связанный матч
             .FirstOrDefaultAsync(r => r.Id == roomId);
     }
@@ -71,14 +72,13 @@ public class RoomService : IRoomService
         
         if (room == null || room.Player2Id != null)
         {
-            return ("комната налл или уже заполнена", false); // Комната не найдена или уже заполнена
+            return ("комната налл или уже заполнена", false); 
         }
 
         // Добавляем второго игрока
         room.Player2Id = playerId;
-        room.Status = "InGame"; // Меняем статус комнаты
+        room.Status = "InGame"; 
 
-        // Обновляем матч
         
         if (match != null)
         {
