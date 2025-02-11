@@ -82,7 +82,7 @@ const Main: React.FC = () => {
         switch (status) {
             case "Waiting":
                 return "Ожидание";
-            case "Started":
+            case "InGame":
                 return "В процессе";
             case "Finished":
                 return "Завершена";
