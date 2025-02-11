@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using TicTacToe.Application.Features.Authorization;
-using TicTacToe.Application.Features.Login;
+using TicTacToe.Application.Features.Auth.Authorization;
+using TicTacToe.Application.Features.Auth.Login;
 using TicTacToe.Application.Interfaces;
 using TicTacToe.Application.Requests;
+using TicTacToe.Application.Requests.AuthRequests;
 using TicTacToe.Domain.Entities;
 
 namespace TicTacToe.WebAPI.Controllers;

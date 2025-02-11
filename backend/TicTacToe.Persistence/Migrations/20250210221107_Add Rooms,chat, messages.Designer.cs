@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TicTacToe.Persistence.EfContext;
@@ -11,9 +12,11 @@ using TicTacToe.Persistence.EfContext;
 namespace TicTacToe.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250210221107_Add Rooms,chat, messages")]
+    partial class AddRoomschatmessages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,9 +31,6 @@ namespace TicTacToe.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("RoomId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
 
@@ -38,9 +38,6 @@ namespace TicTacToe.Persistence.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RoomId")
-                        .IsUnique();
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -62,8 +59,7 @@ namespace TicTacToe.Persistence.Migrations
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasColumnType("text");
 
                     b.Property<TimeOnly>("Time")
                         .HasColumnType("time without time zone");
@@ -116,9 +112,6 @@ namespace TicTacToe.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RoomId")
-                        .IsUnique();
-
                     b.ToTable("Matches");
                 });
 
@@ -126,9 +119,6 @@ namespace TicTacToe.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ChatId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -140,7 +130,7 @@ namespace TicTacToe.Persistence.Migrations
                     b.Property<Guid>("Player1Id")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("Player2Id")
+                    b.Property<Guid>("Player2Id")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Status")
@@ -149,6 +139,9 @@ namespace TicTacToe.Persistence.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MatchId")
+                        .IsUnique();
 
                     b.HasIndex("Player1Id");
 
@@ -190,19 +183,11 @@ namespace TicTacToe.Persistence.Migrations
 
             modelBuilder.Entity("TicTacToe.Domain.Entities.ChatHistory", b =>
                 {
-                    b.HasOne("TicTacToe.Domain.Entities.Room", "Room")
-                        .WithOne("ChatHistory")
-                        .HasForeignKey("TicTacToe.Domain.Entities.ChatHistory", "RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TicTacToe.Domain.Entities.User", "User")
                         .WithOne("ChatHistory")
                         .HasForeignKey("TicTacToe.Domain.Entities.ChatHistory", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Room");
 
                     b.Navigation("User");
                 });
@@ -226,19 +211,13 @@ namespace TicTacToe.Persistence.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TicTacToe.Domain.Entities.Match", b =>
-                {
-                    b.HasOne("TicTacToe.Domain.Entities.Room", "Room")
-                        .WithOne("Match")
-                        .HasForeignKey("TicTacToe.Domain.Entities.Match", "RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Room");
-                });
-
             modelBuilder.Entity("TicTacToe.Domain.Entities.Room", b =>
                 {
+                    b.HasOne("TicTacToe.Domain.Entities.Match", "Match")
+                        .WithOne("Room")
+                        .HasForeignKey("TicTacToe.Domain.Entities.Room", "MatchId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("TicTacToe.Domain.Entities.User", "Player1")
                         .WithMany()
                         .HasForeignKey("Player1Id")
@@ -248,7 +227,10 @@ namespace TicTacToe.Persistence.Migrations
                     b.HasOne("TicTacToe.Domain.Entities.User", "Player2")
                         .WithMany()
                         .HasForeignKey("Player2Id")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Match");
 
                     b.Navigation("Player1");
 
@@ -260,12 +242,10 @@ namespace TicTacToe.Persistence.Migrations
                     b.Navigation("ChatMessages");
                 });
 
-            modelBuilder.Entity("TicTacToe.Domain.Entities.Room", b =>
+            modelBuilder.Entity("TicTacToe.Domain.Entities.Match", b =>
                 {
-                    b.Navigation("ChatHistory")
+                    b.Navigation("Room")
                         .IsRequired();
-
-                    b.Navigation("Match");
                 });
 
             modelBuilder.Entity("TicTacToe.Domain.Entities.User", b =>

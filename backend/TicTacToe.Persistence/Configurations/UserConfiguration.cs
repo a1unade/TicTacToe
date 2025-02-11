@@ -8,10 +8,18 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
     {
-        builder.HasKey(x => x.Id);
+        builder.HasKey(u => u.Id);
 
-        builder.Property(x => x.Name);
+        builder.HasIndex(u => u.Name).IsUnique(); 
 
-        builder.Property(x => x.PasswordHash);
+        builder.Property(u => u.Name)
+            .HasMaxLength(50) 
+            .IsRequired(); 
+
+        builder.Property(u => u.PasswordHash)
+            .IsRequired(); 
+
+        builder.Property(u => u.Score)
+            .HasDefaultValue(0); 
     }
 }

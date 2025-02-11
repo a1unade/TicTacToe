@@ -14,8 +14,13 @@ public class ApplicationDbContext : DbContext, IDbContext
     public DbSet<User> Users { get; set; }
     
     public DbSet<Match> Matches { get; set; }
+    public DbSet<Room> Rooms { get; set; }
     
+    public DbSet<ChatHistory> ChatHistories { get; set; }
     
+    public DbSet<ChatMessage> ChatMessages { get; set; }
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(Extensions.ServiceCollectionExtensions).Assembly);

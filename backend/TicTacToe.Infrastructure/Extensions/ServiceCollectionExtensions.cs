@@ -11,5 +11,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IJwtService, JwtService>()
             .AddScoped<IPasswordHasher, PasswordHasher>();
 
+        services.AddSignalR();
     }
 }

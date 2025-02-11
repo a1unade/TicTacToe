@@ -22,7 +22,8 @@ public class JwtService : IJwtService
         Claim[] claims = 
         {
             new ("Id", user.Id.ToString()),
-            new ("Name", user.Name)
+            new ("Name", user.Name),
+            new ("Score", user.Score.ToString())
         };
 
         var issuer = _options.Issuer;

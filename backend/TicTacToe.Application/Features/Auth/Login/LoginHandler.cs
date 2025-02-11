@@ -1,45 +1,47 @@
 using Microsoft.EntityFrameworkCore;
 using TicTacToe.Application.Interfaces;
 using TicTacToe.Application.Responses;
-using TicTacToe.Domain.Entities;
 
-namespace TicTacToe.Application.Features.Authorization;
+namespace TicTacToe.Application.Features.Auth.Login;
 
-public class AuthCommandHandler : IHandler<AuthCommand, AuthResponse>
+public class LoginHandler : IHandler<LoginCommand, AuthResponse>
 {
     private readonly IDbContext _context;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtService _jwtService;
 
-    public AuthCommandHandler(IDbContext context, IPasswordHasher passwordHasher, IJwtService jwtService)
+    public LoginHandler(IDbContext context, IPasswordHasher passwordHasher, IJwtService jwtService)
     {
         _context = context;
         _passwordHasher = passwordHasher;
         _jwtService = jwtService;
     }
 
-    public async Task<AuthResponse> Handle(AuthCommand request, CancellationToken cancellationToken)
+    public async Task<AuthResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var existingUser = await _context.Users
+            var user = await _context.Users
                 .FirstOrDefaultAsync(x => x.Name == request.Name, cancellationToken);
 
-            if (existingUser != null)
+            if (user == null)
             {
                 return new AuthResponse
                 {
                     IsSuccessfully = false,
-                    Message = "User with this name already exists."
+                    Message = "User not found."
                 };
             }
 
-            var passwordHash = _passwordHasher.HashPassword(request.Password);
-            
-            var user = new User(request.Name, passwordHash);
-
-            await _context.Users.AddAsync(user, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
+            var isPasswordValid = _passwordHasher.VerifyPassword(request.Password, user.PasswordHash);
+            if (!isPasswordValid)
+            {
+                return new AuthResponse
+                {
+                    IsSuccessfully = false,
+                    Message = "Invalid password."
+                };
+            }
 
             var token = _jwtService.GenerateToken(user);
 
@@ -57,4 +59,3 @@ public class AuthCommandHandler : IHandler<AuthCommand, AuthResponse>
         }
     }
 }
-

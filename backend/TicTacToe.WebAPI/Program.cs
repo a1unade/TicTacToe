@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using TicTacToe.Application.Extensions;
 using TicTacToe.Infrastructure.Extensions;
+using TicTacToe.Infrastructure.Hubs;
 using TicTacToe.Persistence.Extensions;
 using TicTacToe.Persistence.MigrationTools;
 
@@ -68,5 +69,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<GameHub>("/gameHub");
 
 app.Run();
