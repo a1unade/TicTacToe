@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using TicTacToe.Application.DTOs;
 using TicTacToe.Application.Interfaces;
@@ -8,10 +9,13 @@ namespace TicTacToe.Infrastructure.Services;
 public class MatchService : IMatchService
 {
     private readonly IDbContext _context;
+    private readonly IBus _bus;
 
-    public MatchService(IDbContext context)
+
+    public MatchService(IDbContext context, IBus bus)
     {
         _context = context;
+        _bus = bus;
     }
 
     public async Task<(string Board, string Status, Guid? NextPlayer, string Message)> ProcessMove(MoveDto moveDto)
@@ -48,7 +52,8 @@ public class MatchService : IMatchService
             match.Status = "GameOver";
             match.WinnerId = moveDto.PlayerId;
             await _context.SaveChangesAsync();
-           // await UpdateScores(moveDto.PlayerId, 3, true);
+            Guid loserId = match.CurrentPlayerId == room.Player1Id ? room.Player2Id ?? Guid.Empty : room.Player1Id;
+            await UpdateScores(moveDto.PlayerId, loserId);
             return (match.Board, "GameOver", null, $"Победитель: {winner}");
         }
 
@@ -68,36 +73,9 @@ public class MatchService : IMatchService
         return (match.Board, "InProgress", match.CurrentPlayerId, "Ход принят!");
     }
 
-    private async Task UpdateScores(Guid userId, int updateScore, bool win)
+    private async Task UpdateScores(Guid winnerId, Guid loserId)
     {
-        
-        
-        // /// ТУт можно добавить монго или ребит 
-        // var room = await _context.Rooms
-        //     .Include(r => r.Player1)
-        //     .Include(r => r.Player2)
-        //     .FirstOrDefaultAsync(r => r.Id == roomId);
-        //
-        // if (room == null) return;
-        //
-        // var winnerPlayer = winner == "X" ? room.Player1 : room.Player2;
-        // var loserPlayer = winner == "X" ? room.Player2 : room.Player1;
-        //
-        // if (winnerPlayer != null)
-        // {
-        //     winnerPlayer.Score += 3; 
-        // }
-        //
-        // if (loserPlayer != null)
-        // {
-        //     loserPlayer.Score -= 1; 
-        //     if (loserPlayer.Score < 0)
-        //     {
-        //         loserPlayer.Score = 0; 
-        //     }
-        // }
-        //
-        // await _context.SaveChangesAsync();
+        await _bus.Publish(new UpdateScoreDto { WinnerId = winnerId, LoserId = loserId });
     }
 
     private async Task NotifyDraw(Guid roomId)

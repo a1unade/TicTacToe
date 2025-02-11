@@ -2,6 +2,7 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TicTacToe.Application.Interfaces;
+using TicTacToe.Infrastructure.Consumer;
 using TicTacToe.Infrastructure.Options;
 using TicTacToe.Infrastructure.Services;
 
@@ -31,6 +32,7 @@ public static class ServiceCollectionExtensions
         services.AddMassTransit(x =>
         {
             x.SetKebabCaseEndpointNameFormatter();
+            x.AddConsumer<ScoreConsumer>();
             
             x.UsingRabbitMq((context, cfg) =>
             {

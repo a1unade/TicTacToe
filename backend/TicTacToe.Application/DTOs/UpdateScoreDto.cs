@@ -2,7 +2,7 @@ namespace TicTacToe.Application.DTOs;
 
 public class UpdateScoreDto
 {
-    public int NewScore { get; set; }
+    public Guid WinnerId { get; set; }
     
-    public Guid UserId { get; set; }
+    public Guid LoserId { get; set; }
 }
