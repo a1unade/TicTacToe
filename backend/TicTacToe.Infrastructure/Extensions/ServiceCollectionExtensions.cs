@@ -9,7 +9,8 @@ public static class ServiceCollectionExtensions
     public static void AddInfrastructureLayer(this IServiceCollection services)
     {
         services.AddScoped<IJwtService, JwtService>()
-            .AddScoped<IPasswordHasher, PasswordHasher>();
+            .AddScoped<IPasswordHasher, PasswordHasher>()
+            .AddScoped<IRoomService, RoomService>();
 
         services.AddSignalR();
     }

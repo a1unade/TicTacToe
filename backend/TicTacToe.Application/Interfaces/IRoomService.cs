@@ -10,5 +10,4 @@ public interface IRoomService
     public Task<Room?> GetRoomByIdAsync(Guid roomId);
 
     public Task<(string, bool)> AddPlayerToRoomAsync(Guid roomId, Guid playerId);
-
 }

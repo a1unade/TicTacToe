@@ -9,5 +9,4 @@ public class ConnectionDto
     public Guid? RoomId { get; set; }
     
     public int Player2Score { get; set; }
-    
 }

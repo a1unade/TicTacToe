@@ -1,6 +1,6 @@
 import './index.css'
 import { createRoot } from 'react-dom/client'
-import {BrowserRouter, Route, Routes} from "react-router-dom";
+import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
 import SignIn from "./pages/auth/sign-in.tsx";
 import SignUp from "./pages/auth/sign-up.tsx";
 import Game from "./pages/game";
@@ -10,14 +10,26 @@ import {AlertProvider} from "./contexts/alert-provider.tsx";
 import Alert from "./components/alert";
 import {Provider} from "react-redux";
 import store from "./store";
-import {useEffect} from "react";
+import {JSX, useEffect, useState} from "react";
 import {jwtDecode} from "jwt-decode";
 import {JWTTokenDecoded} from "./interfaces/jwt-token/jwt-decoded.ts";
 import {useUserActions} from "./hooks/use-actions.ts";
+import {useUserTypedSelector} from "./hooks/use-typed-selector.ts";
+
+const ProtectedRoute = ({ element }: { element: JSX.Element }) => {
+    const { id } = useUserTypedSelector(state => state.user);
+
+    if (!id) {
+        return <Navigate to="/sign-in" replace />;
+    }
+
+    return element;
+};
 
 export const App = () => {
     const { alerts, removeAlert } = useAlerts();
     const {createUserFromToken} = useUserActions();
+    const [isAuthChecked, setIsAuthChecked] = useState(false);
 
     useEffect(() => {
         const authCookie = document.cookie.split('; ').find((row) => row.startsWith('jwt='));
@@ -37,7 +49,13 @@ export const App = () => {
                 console.error('Invalid token', error);
             }
         }
+
+        setIsAuthChecked(true);
     }, [createUserFromToken]);
+
+    if (!isAuthChecked) {
+        return <div>Загрузка...</div>;
+    }
 
     return (
         <>
@@ -49,8 +67,8 @@ export const App = () => {
             <Routes>
                 <Route path={"/sign-in"} element={<SignIn />} />
                 <Route path={"/sign-up"} element={<SignUp />} />
-                <Route path={"/game/:id"} element={<Game />} />
-                <Route path={"/"} element={<Main />} />
+                <Route path="/game/:id" element={<ProtectedRoute element={<Game />} />} />
+                <Route path="/" element={<ProtectedRoute element={<Main />} />} />
             </Routes>
         </>
     );
