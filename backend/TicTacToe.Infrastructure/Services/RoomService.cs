@@ -52,6 +52,8 @@ public class RoomService : IRoomService
     public async Task<Room?> GetRoomByIdAsync(Guid roomId)
     {
         return await _context.Rooms
+            .Include(x => x.Player1)
+            .Include(x => x.Player2)
             .Include(r => r.Match) // Подгружаем связанный матч
             .FirstOrDefaultAsync(r => r.Id == roomId);
     }
