@@ -30,7 +30,7 @@ public class GameHub : Hub
                 PlayerId = connectionDto.Player1,
                 Role = "Player1",
                 RoomId = roomId,
-                Message = "$Room created and connected with ID: {roomId}"
+                Message = $"Room created and connected with ID: {roomId}"
             });
 
             return roomId.ToString()!;
@@ -110,13 +110,13 @@ public class GameHub : Hub
                     RoomId = room.Id
                 });
 
-                return $"Connected to room as Player 2 with ID: {joinGame.RoomId}";
+                return $"Второй игрок подключился к игре в комнате: {joinGame.RoomId}";
             }
 
             return message;
         }
 
-        return $"Место занято этим челом {room.Player2.Name}";
+        return $"Место занято этими челами: {room.Player1.Name} и  {room.Player2.Name}";
     }
 
     public async Task NotifyMove(Guid roomId, int position)
