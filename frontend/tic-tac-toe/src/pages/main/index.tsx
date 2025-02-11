@@ -19,18 +19,9 @@ const Main: React.FC = () => {
     const navigate = useNavigate();
     const componentRef = useRef<HTMLDivElement | null>(null);
     const {id, score, username} = useUserTypedSelector(state => state.user);
-    const [roomId, setRoomId] = useState<string | null>(null);
-    const [gameStatus, setGameStatus] = useState<string>("waiting");
-    const [move, setMove] = useState<number>(0);
     const {deleteUser} = useUserActions();
-    console.log("user: " + id)
-    console.log(gameStatus, move)
 
-    const { createOrJoinRoom, joinRoom } = useSignalR({
-        setRoomId,
-        setGameStatus,
-        setMove,
-    });
+    const { createOrJoinRoom, joinRoom } = useSignalR();
 
     const handleScroll = useCallback((event: Event) => {
         const target = event.target as Document;
@@ -100,11 +91,11 @@ const Main: React.FC = () => {
         }
     };
 
-    const handleGameJoin = (gameId: string) => {
-        //navigate(`/game/${gameId}`);
-
-        joinRoom(id, gameId)
+    const handleGameJoin = async (gameId: string) => {
+        await joinRoom(id, gameId)
             .then(r => console.log(r))
+
+        navigate(`/game/${gameId}`);
     }
 
     return (
@@ -141,7 +132,7 @@ const Main: React.FC = () => {
                 <div className="modal">
                     <h2>Создать игру</h2>
                     <input type="number" value={maxRating} onChange={e => setMaxRating(parseInt(e.target.value))} placeholder="Макс. рейтинг" />
-                    <button onClick={() => createOrJoinRoom(id, roomId, maxRating)}>Создать</button>
+                    <button onClick={() => createOrJoinRoom(id, null, maxRating)}>Создать</button>
                 </div>
             )}
         </div>

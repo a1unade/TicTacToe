@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import {useUserTypedSelector} from "../../hooks/use-typed-selector.ts";
+import {useParams} from "react-router-dom";
 
-const Game: React.FC = () => {
+const Game = (props: { joinGame: (userId: string, roomId: string) => Promise<void> }) => {
+    const {joinGame} = props;
+    const {id} = useUserTypedSelector(state => state.user);
+    const {roomId} = useParams<string>();
     const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
     const [isXNext, setIsXNext] = useState(true);
     const [winningLine, setWinningLine] = useState<number[] | null>(null);
@@ -45,6 +50,7 @@ const Game: React.FC = () => {
 
     return (
         <div className="game">
+            <button className={"main-button"} onClick={() => joinGame(id, roomId!)}>Присоединиться</button>
             <div className="players">
                 {players.map(player => (
                     <div key={player.symbol} className="player">
