@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
 using TicTacToe.Application.DTOs;
 using TicTacToe.Application.Interfaces;
 
@@ -26,6 +25,14 @@ public class GameHub : Hub
             }
 
             await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString()!);
+            
+            await Clients.Group(roomId.ToString()!).SendAsync("PlayerJoined", new
+            {
+                PlayerId = connectionDto.Player1,
+                Role = "Player1",
+                RoomId = roomId
+            });
+            
             return $"Room created and connected with ID: {roomId}";
         }
 
@@ -43,8 +50,14 @@ public class GameHub : Hub
             var (message, success) = await _roomService.AddPlayerToRoomAsync(room.Id, connectionDto.Player1);
             if (success)
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, connectionDto.RoomId.ToString());
-                await Clients.Group(room.Id.ToString()).SendAsync("PlayerJoined", connectionDto.Player1);
+                await Groups.AddToGroupAsync(Context.ConnectionId, connectionDto.RoomId.ToString()!);
+                await Clients.Group(room.Id.ToString()).SendAsync("PlayerJoined", new
+                {
+                    PlayerId = connectionDto.Player1,
+                    Role = "Player2",
+                    RoomId = room.Id
+                });
+                
                 return $"Connected to room as Player 2 with ID: {connectionDto.RoomId}";
             }
             else

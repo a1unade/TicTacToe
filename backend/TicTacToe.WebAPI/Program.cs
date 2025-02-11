@@ -16,7 +16,7 @@ builder.Services.AddSwaggerGen();
 // CQRS
 builder.Services.AddCqrs();
 
-builder.Services.AddInfrastructureLayer();
+builder.Services.AddInfrastructureLayer(builder.Configuration);
 
 builder.Services.AddPersistenceLayer(builder.Configuration);
 
@@ -63,7 +63,6 @@ app.UseCors(b => b
     .AllowAnyHeader()                      
     .AllowCredentials());  
 
-// TODO Hubs
 
 app.UseAuthentication();
 app.UseAuthorization();
