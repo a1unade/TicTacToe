@@ -13,7 +13,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IJwtService, JwtService>()
             .AddScoped<IPasswordHasher, PasswordHasher>()
-            .AddScoped<IRoomService, RoomService>();
+            .AddScoped<IRoomService, RoomService>()
+            .AddScoped<IMatchService, MatchService>();
 
         services.AddSignalR();
         
