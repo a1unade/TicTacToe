@@ -34,7 +34,7 @@ public class GetGamesQueryHandler : IHandler<GetGamesQuery, GamesList>
                 CreatedAt = r.CreatedAt,
                 Status = r.Status,
                 CanJoin = r.Status == "Waiting" ,
-                MaxScore = r.Match.MaxScore,
+                MaxScore = r.Match.MaxScore
             })
             .ToListAsync(cancellationToken);
 

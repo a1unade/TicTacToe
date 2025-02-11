@@ -6,5 +6,7 @@ public class UsersDto
 
     public string Name { get; set; } = default!;
     
-    public Guid UserId { get; set; }
+    public Guid UserId { get; set; } 
+    
+    public char Symbol { get; set; }
 }

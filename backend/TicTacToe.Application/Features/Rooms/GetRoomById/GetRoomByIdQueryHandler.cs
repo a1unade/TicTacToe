@@ -33,13 +33,15 @@ public class GetRoomByIdQueryHandler : IHandler<GetRoomByIdQuery, RoomForUi>
             {
                 Score = room.Player1?.Score ?? 0,
                 Name = room.Player1?.Name ?? "Неизвестный",
-                UserId = room.Player1?.Id ?? Guid.Empty
+                UserId = room.Player1?.Id ?? Guid.Empty,
+                Symbol = 'X'
             },
             SecondPlayer = room.Player2 != null ? new UsersDto
             {
                 Score = room.Player2.Score,
                 Name = room.Player2.Name,
-                UserId = room.Player2.Id
+                UserId = room.Player2.Id,
+                Symbol = 'O'
             } : null!, 
             Match = room.Match != null ? new MatchDto
             {
