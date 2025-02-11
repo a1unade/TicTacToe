@@ -48,7 +48,7 @@ const SignUp = () => {
 
         if (messageUsername.length === 0 && messagePassword.length === 0 && password === confirm) {
             try {
-                createUser(username, password, "auth");
+                await createUser(username, password, "auth");
                 navigate('/');
             } catch (error: unknown) {
                 if (error instanceof Error) {
