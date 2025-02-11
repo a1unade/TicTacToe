@@ -40,7 +40,7 @@ const RatingModal = (props: {
             <div className="ranking-list">
                 {users.length > 0 ? (
                     users.map((user, index) => (
-                        <div key={user.id} className={`ranking-item ${index < 3 ? "top-player" : ""}`}>
+                        <div key={user.userIdPostgres} className={`ranking-item ${index < 3 ? "top-player" : ""}`}>
                             {index < 3 ? (
                                 <FaCrown className="crown-icon" style={{ color: crownColors[index] }} />
                             ) : (
