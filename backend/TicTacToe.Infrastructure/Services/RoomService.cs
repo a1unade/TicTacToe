@@ -37,7 +37,7 @@ public class RoomService : IRoomService
             IsStarted = false,
             CreatedAt = DateTime.UtcNow,
             Status = "Waiting",
-            MaxScore = connectionDto.MaxScore!.Value,
+            MaxScore = connectionDto.MaxScore ?? 0,
             RoomId = room.Id,
             Board = "---------",
             CurrentPlayerId = connectionDto.Player1
