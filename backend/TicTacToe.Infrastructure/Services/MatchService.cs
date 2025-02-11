@@ -16,14 +16,17 @@ public class MatchService : IMatchService
 
     public async Task<(string Board, string Status, Guid? NextPlayer, string Message)> ProcessMove(MoveDto moveDto)
     {
-        var match = await _context.Matches
-            .Include(x => x.CurrentPlayerId)
-            .FirstOrDefaultAsync(m => m.RoomId == moveDto.RoomId);
-        
+        var match = await _context.Matches.FirstOrDefaultAsync(m => m.RoomId == moveDto.RoomId);
         if (match == null) return ("", "Error", null, "Матч не найден");
 
         var room = await _context.Rooms.FirstOrDefaultAsync(r => r.Id == moveDto.RoomId);
         if (room == null) return ("", "Error", null, "Комната не найдена");
+
+        // Определяем, кто ходит первым
+        if (match.CurrentPlayerId == Guid.Empty)
+        {
+            match.CurrentPlayerId = room.Player1Id;
+        }
 
         // Проверяем, чей сейчас ход
         if (match.CurrentPlayerId != moveDto.PlayerId)
@@ -35,7 +38,7 @@ public class MatchService : IMatchService
 
         // Обновляем доску
         var boardArray = match.Board.ToCharArray();
-        boardArray[moveDto.Position] = moveDto.PlayerId == room.Player1Id ? 'X' : 'O';
+        boardArray[moveDto.Position] = (moveDto.PlayerId == room.Player1Id) ? 'X' : 'O';
         match.Board = new string(boardArray);
 
         // Проверяем, есть ли победитель
@@ -43,9 +46,10 @@ public class MatchService : IMatchService
         if (winner != null)
         {
             match.Status = "GameOver";
+            match.WinnerId = moveDto.PlayerId;
             await _context.SaveChangesAsync();
-            //await UpdateScoresAndNotify(match.RoomId, winner);
-            return (match.Board, match.Status, null, $"Победитель: {winner}");
+           // await UpdateScores(moveDto.PlayerId, 3, true);
+            return (match.Board, "GameOver", null, $"Победитель: {winner}");
         }
 
         // Проверяем на ничью
@@ -53,20 +57,18 @@ public class MatchService : IMatchService
         {
             match.Status = "Draw";
             await _context.SaveChangesAsync();
-           // await NotifyDraw(match.RoomId);
-            return (match.Board, match.Status, null, "Ничья!");
+            return (match.Board, "Draw", null, "Ничья!");
         }
 
         // Смена игрока
-        match.CurrentPlayerId =
-            (match.CurrentPlayerId == room.Player1Id) ? room.Player2Id ?? room.Player1Id : room.Player1Id;
+        match.CurrentPlayerId = (match.CurrentPlayerId == room.Player1Id) ? room.Player2Id ?? room.Player1Id : room.Player1Id;
 
         await _context.SaveChangesAsync();
 
         return (match.Board, "InProgress", match.CurrentPlayerId, "Ход принят!");
     }
 
-    private async Task UpdateScoresAndNotify(Guid roomId, string winner)
+    private async Task UpdateScores(Guid userId, int updateScore, bool win)
     {
         
         

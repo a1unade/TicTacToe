@@ -5,11 +5,9 @@ namespace TicTacToe.Application.Interfaces;
 
 public interface IUserScoreService
 {
-    Task<List<UserScore>> GetAsync(CancellationToken cancellationToken);
     Task<UserScore?> GetAsync(string id, CancellationToken cancellationToken);
     Task CreateAsync(UserScore newUserScore, CancellationToken cancellationToken);
-    Task UpdateAsync(ObjectId id, UserScore updatedUserScore, CancellationToken cancellationToken);
-    Task RemoveAsync(string id, CancellationToken cancellationToken);
+    Task UpdateScoreAsync(Guid userIdPostgres, int newScore, CancellationToken cancellationToken);
 
     Task<UserScore?> GetByUserIdPostgresAsync(Guid userIdPostgres, CancellationToken cancellationToken);
 
