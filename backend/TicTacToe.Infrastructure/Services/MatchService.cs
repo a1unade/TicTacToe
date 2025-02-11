@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TicTacToe.Application.DTOs;
 using TicTacToe.Application.Interfaces;
+using TicTacToe.Domain.Entities;
 
 namespace TicTacToe.Infrastructure.Services;
 
@@ -37,7 +38,7 @@ public class MatchService : IMatchService
         match.Board = new string(boardArray);
 
         // Проверяем, есть ли победитель
-        string winner = CheckWinner(match.Board);
+        string? winner = CheckWinner(match.Board);
         if (winner != null)
         {
             match.Status = "GameOver";
@@ -66,6 +67,11 @@ public class MatchService : IMatchService
 
     private async Task UpdateScoresAndNotify(Guid roomId, string winner)
     {
+        
+        
+        
+        
+        /// ТУт можно добавить монго или ребит 
         var room = await _context.Rooms
             .Include(r => r.Player1)
             .Include(r => r.Player2)
@@ -95,6 +101,11 @@ public class MatchService : IMatchService
 
     private async Task NotifyDraw(Guid roomId)
     {
+        
+        /// ТУт можно добавить монго или ребит 
+
+        
+        
         var room = await _context.Rooms
             .Include(r => r.Player1)
             .Include(r => r.Player2)
@@ -125,5 +136,37 @@ public class MatchService : IMatchService
         }
 
         return null;
+    }
+    
+    public async Task<(string Board, string Status, Guid PlayerId, char Symbol)> StartNewRound(Guid roomId)
+    {
+        var room = await _context.Rooms
+            .Include(r => r.Player1)
+            .Include(r => r.Player2)
+            .Include(x => x.Match)
+            .FirstOrDefaultAsync(r => r.Id == roomId);
+
+        if (room == null) throw new ArgumentException();
+        if (room.Match == null) throw new ArgumentException();
+        
+        var newMatch = new Match
+        {
+            RoomId = room.Id,
+            Board = "---------", // Начальная пустая доска
+            Status = "InProgress", // Статус игры в процессе
+            CurrentPlayerId = room.Player1Id, // Игрок 1 начинает первым
+            MaxScore = room.Match.MaxScore // Очки для нового матча
+        };
+
+        // Сохраняем новый матч
+        _context.Matches.Add(newMatch);
+        await _context.SaveChangesAsync();
+
+        // Обновляем комнату, чтобы она ссылается на новый матч
+        room.Match = newMatch;
+
+        await _context.SaveChangesAsync();
+
+        return (newMatch.Board, newMatch.Status, room.Player1.Id, 'X');
     }
 }
